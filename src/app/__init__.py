@@ -1,6 +1,7 @@
 import pygame
 from .platforms import Platform
 from .player import Player
+from .powerups import SpeedBoost
 
 VIRTUAL_SIZE = (1920, 1080)
 
@@ -15,6 +16,10 @@ def main():
 
     player1 = Player(1)
     player2 = Player(2)
+
+    speed_boost = None
+    BOOST_EVENT = pygame.USEREVENT + 1
+    pygame.time.set_timer(BOOST_EVENT, 5000)  # spawn every 5 seconds
 
     punches_p1 = []
     punches_p2 = []
@@ -38,6 +43,9 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == BOOST_EVENT and speed_boost is None:
+                speed_boost = SpeedBoost(VIRTUAL_SIZE[0])
+
 
         virtual.blit((background), (0, 0))
 
@@ -98,6 +106,27 @@ def main():
         player1.draw_health_bar(virtual)
         player2.draw_hearts(virtual)
         player2.draw_health_bar(virtual)
+
+        # ---------- SPEED BOOST LOGIC ----------
+        if speed_boost:
+            speed_boost.update()  # move down
+            speed_boost.draw(virtual)  # draw yellow square
+
+            speed_boost.check_collision(player1)
+            speed_boost.check_collision(player2)
+
+            speed_boost.handle_timer(player1)
+            speed_boost.handle_timer(player2)
+
+        # Fell off screen without being collected
+        if speed_boost and speed_boost.y > VIRTUAL_SIZE[1] and speed_boost.active:
+            speed_boost = None
+
+
+        # Boost finished
+        if speed_boost and not speed_boost.active and not speed_boost.used:
+            speed_boost = None
+
 
 
         blit_scaled(screen, virtual)
