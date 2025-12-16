@@ -55,18 +55,30 @@ class Player:
         self.death_time = 0
         self.respawn_y = 290
 
+        if self.player == 1:
+            base = "assets/player_1"
+            items = 12
+        else:
+            base = "assets/player_2"
+            items = 6
+
         self.walk_right = [
-            pygame.image.load(f"assets/player_1/right/movement_right_{i}.png").convert_alpha()
-            for i in range(1, 13)
+            pygame.image.load(f"{base}/right/movement_right_{i}.png").convert_alpha()
+            for i in range(1, items)
         ]
 
         self.walk_left = [
-            pygame.image.load(f"assets/player_1/left/movement_left_{i}.png").convert_alpha()
-            for i in range(1, 13)
+            pygame.image.load(f"{base}/left/movement_left_{i}.png").convert_alpha()
+            for i in range(1, items)
         ]
 
-        self.jump_img = pygame.image.load("assets/player_1/movement_jumping.png").convert_alpha()
-        self.fall_img = pygame.image.load("assets/player_1/movement_falling.png").convert_alpha()
+        if self.player == 1:
+            self.jump_img = pygame.image.load(f"{base}/movement_jumping.png").convert_alpha()
+            self.fall_img = pygame.image.load(f"{base}/movement_falling.png").convert_alpha()
+        else:
+            self.jump_img = pygame.image.load(f"{base}/movement_jumping.png").convert_alpha()
+            self.fall_img = pygame.image.load(f"{base}/movement_falling.png").convert_alpha()
+        
 
         self.walk_right = [
             pygame.transform.scale(img, (self.w, self.h)) for img in self.walk_right
