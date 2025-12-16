@@ -56,14 +56,13 @@ class Player:
         self.respawn_y = 290
 
         self.walk_right = [
-            pygame.image.load("assets/movement_right_1.png").convert_alpha(),
-            pygame.image.load("assets/movement_right_2.png").convert_alpha(),
-            pygame.image.load("assets/movement_right_3.png").convert_alpha(),
+            pygame.image.load(f"assets/right/movement_right_{i}.png").convert_alpha()
+            for i in range(1, 13)
         ]
+
         self.walk_left = [
-            pygame.image.load("assets/movement_left_1.png").convert_alpha(),
-            pygame.image.load("assets/movement_left_2.png").convert_alpha(),
-            pygame.image.load("assets/movement_left_3.png").convert_alpha(),
+            pygame.image.load(f"assets/left/movement_left_{i}.png").convert_alpha()
+            for i in range(1, 13)
         ]
 
         self.jump_img = pygame.image.load("assets/movement_jumping.png").convert_alpha()
