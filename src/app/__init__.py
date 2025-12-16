@@ -16,7 +16,7 @@ def main():
     player1 = Player(1)
     player2 = Player(2)
 
-    pygame.time.Clock().tick(60)
+    clock = pygame.time.Clock()
 
     running = True
     while running:
@@ -78,3 +78,6 @@ def blit_scaled(screen, virtual):
 
     screen.fill((0, 0, 0))
     screen.blit(scaled, (x, y))
+
+
+main()
