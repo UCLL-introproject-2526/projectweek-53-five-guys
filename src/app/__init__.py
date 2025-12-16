@@ -16,9 +16,6 @@ def main():
     player1 = Player(1)
     player2 = Player(2)
 
-    punches_p1 = []
-    punches_p2 = []
-
     background = pygame.image.load("assets/background.png").convert()
     background = pygame.transform.scale(background, (VIRTUAL_SIZE[0], VIRTUAL_SIZE[1]))
 
@@ -41,8 +38,8 @@ def main():
 
         virtual.blit((background), (0, 0))
 
-        #for p in platforms:
-            #p.draw(virtual)
+        # for p in platforms:
+        # p.draw(virtual)
 
         player1.core_logic(platforms)
         player2.core_logic(platforms)
@@ -98,7 +95,6 @@ def main():
         player1.draw_health_bar(virtual)
         player2.draw_hearts(virtual)
         player2.draw_health_bar(virtual)
-
 
         blit_scaled(screen, virtual)
         pygame.display.flip()
