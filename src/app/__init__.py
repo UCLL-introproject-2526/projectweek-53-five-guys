@@ -14,12 +14,15 @@ def main():
     player1 = Player(1)
     player2 = Player(2)
 
-    pygame.time.Clock().tick(60)
+    clock = pygame.time.Clock()
 
     jump = 0
 
     running = True
     while running:
+        
+        clock.tick(60)
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -59,3 +62,5 @@ def main():
             (player2.x, player2.y, player2.w, player2.h),
         )
         pygame.display.flip()
+
+main()
