@@ -38,8 +38,8 @@ def main():
 
         virtual.blit((background), (0, 0))
 
-        for p in platforms:
-            p.draw(virtual)
+        #for p in platforms:
+           # p.draw(virtual)
 
         player1.move_logic(platforms)
         player2.move_logic(platforms)

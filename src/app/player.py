@@ -5,8 +5,8 @@ import time
 class Player:
     def __init__(self, player):
         self.player = player
-        self.w = 80
-        self.h = 80
+        self.w = 100
+        self.h = 100
         WIDTH = 1024
         HEIGHT = 768
 
@@ -65,6 +65,7 @@ class Player:
         ]
         self.jump_img = pygame.transform.scale(self.jump_img, (self.w, self.h))
         self.fall_img = pygame.transform.scale(self.fall_img, (self.w, self.h))
+
 
         self.facing = "RIGHT"
         self.frame_index = 0
