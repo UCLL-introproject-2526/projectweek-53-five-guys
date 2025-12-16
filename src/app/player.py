@@ -46,14 +46,9 @@ class Player:
         self.walk_right = [
             pygame.image.load(f"assets/right/movement_right_{i}.png").convert_alpha()
             for i in range(1, 13)
-            pygame.image.load(f"assets/right/movement_right_{i}.png").convert_alpha()
-            for i in range(1, 13)
         ]
 
-
         self.walk_left = [
-            pygame.image.load(f"assets/left/movement_left_{i}.png").convert_alpha()
-            for i in range(1, 13)
             pygame.image.load(f"assets/left/movement_left_{i}.png").convert_alpha()
             for i in range(1, 13)
         ]
