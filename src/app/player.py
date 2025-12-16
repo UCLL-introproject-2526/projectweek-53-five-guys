@@ -80,10 +80,32 @@ class Player:
         self.jump_img = pygame.transform.scale(self.jump_img, (self.w, self.h))
         self.fall_img = pygame.transform.scale(self.fall_img, (self.w, self.h))
 
+        self.attack_right = [
+            pygame.image.load(f"assets/attack/attack_right_{i}.png").convert_alpha()
+            for i in range(1,5)
+        ]
+        self.attack_left = [
+            pygame.image.load(f"assets/attack/attack_left_{i}.png").convert_alpha()
+            for i in range(1,5)
+        ]
+        self.attack_right = [
+            pygame.transform.scale(img, (self.w, self.h)) for img in self.attack_right
+        ]
+        self.attack_left = [
+            pygame.transform.scale(img, (self.w, self.h)) for img in self.attack_left
+        ]
+
         self.facing = "RIGHT"
         self.frame_index = 0
         self.anim_timer = 0
         self.anim_speed = 8
+
+        self.is_attacking = False
+        self.attack_frame = 0
+        self.attack_anim_speed = 5
+        
+        self.attack_frame_duration_ms = 90
+        self.last_attack_frame_at = 0
 
         self.current_img = self.walk_right[0]
 
@@ -134,9 +156,10 @@ class Player:
         if keys[self.key_punch]:
             self.punch()
 
-        for p in self.punches:
-            now = pygame.time.get_ticks()
-            if now - p[2] >= 300:
+        
+        now = pygame.time.get_ticks()
+        for p in self.punches[:]:
+            if now - p[2] >= 150:
                 self.punches.remove(p)
 
         if keys[self.key_up] and not self.jump_held and self.jumps_left > 0:
@@ -203,11 +226,17 @@ class Player:
     def punch(self):
         now = pygame.time.get_ticks()
 
-        if now - self.punched_on < 1000:
+        if now - self.punched_on < 300:
             return
 
+        self.is_attacking = True
+        self.attack_frame = 0
+        self.anim_timer = 0
+        self.last_attack_frame_at = now
+        self.current_img = self.attack_left[0] if self.facing == "LEFT" else self.attack_right[0]
+
         if self.facing == "LEFT":
-            punch_meta = (self.x - PUNCH_HEIGHT, self.y + int(0.3 * self.h), now)
+            punch_meta = (self.x - PUNCH_WIDTH, self.y + int(0.3 * self.h), now)
         else:
             punch_meta = (self.x + self.w, self.y + int(0.3 * self.h), now)
 
@@ -215,6 +244,22 @@ class Player:
         self.punches.append(punch_meta)
 
     def update_animation(self, moving_left, moving_right):
+       
+        if self.is_attacking:
+            frames = self.attack_left if self.facing == "LEFT" else self.attack_right
+            now = pygame.time.get_ticks()
+            if now - self.last_attack_frame_at >= self.attack_frame_duration_ms:
+                self.last_attack_frame_at = now
+                self.attack_frame += 1
+                if self.attack_frame >= len(frames):
+                    self.is_attacking = False
+                    self.attack_frame = 0
+                    
+                    self.current_img = self.walk_left[0] if self.facing == "LEFT" else self.walk_right[0]
+                else:
+                    self.current_img = frames[self.attack_frame]
+            return
+
         if not self.is_grounded:
             if self.velocity_y < 0:
                 self.current_img = self.jump_img
@@ -227,9 +272,7 @@ class Player:
         elif moving_right:
             frames = self.walk_right
         else:
-            self.current_img = (
-                self.walk_right[0] if self.facing == "RIGHT" else self.walk_left[0]
-            )
+            self.current_img = self.walk_right[0] if self.facing == "RIGHT" else self.walk_left[0]
             self.frame_index = 0
             self.anim_timer = 0
             return
