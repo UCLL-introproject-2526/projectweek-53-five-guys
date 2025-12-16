@@ -15,15 +15,18 @@ def main():
     player1 = Player(1)
     player2 = Player(2)
 
-    
+   
+    background = pygame.image.load("images_bg/bg_image.png").convert()
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
         
 
    
     platforms = [
-        Platform(180, 550, 600, 10),
+        Platform(240, 530, 550, 0),
        
-        Platform(60, 300, int(WIDTH * 0.3), 10),
-        Platform(WIDTH - int(WIDTH * 0.3) - 40, 300, int(WIDTH * 0.3), 10)
+        Platform(145, 280, int(WIDTH * 0.25), 0),
+        Platform(WIDTH - int(WIDTH * 0.3) - 80, 280, int(WIDTH * 0.3), 0)
+
 
 
     ]
@@ -36,11 +39,12 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        screen.fill((0, 0, 0))
+        screen.blit((background), (0,0))
+
 
         for p in platforms:
             p.draw(screen)
-
+            
         player1.move_logic(platforms)
         player2.move_logic(platforms)
 
