@@ -46,11 +46,6 @@ def main():
         PUNCH_WIDTH = 70
         PUNCH_HEIGHT = 20
         for p in player1.punches:
-            pygame.draw.rect(
-                virtual,
-                (0, 255, 0),
-                (p[0], p[1], PUNCH_WIDTH, PUNCH_HEIGHT),
-            )
             if player1.rects_overlap(
                 player2.x,
                 player2.y,
@@ -65,11 +60,6 @@ def main():
                 player1.punches.remove(p)
 
         for p in player2.punches:
-            pygame.draw.rect(
-                virtual,
-                (255, 0, 0),
-                (p[0], p[1], PUNCH_WIDTH, PUNCH_HEIGHT),
-            )
             if player2.rects_overlap(
                 player1.x,
                 player1.y,
