@@ -16,23 +16,27 @@ def main():
     player1 = Player(1)
     player2 = Player(2)
 
+    background = pygame.image.load("assets/background.png").convert()
+    background = pygame.transform.scale(background, (VIRTUAL_SIZE[0], VIRTUAL_SIZE[1]))
+
+    platforms = [
+        Platform(270, 395, 559, 73),
+        Platform(1190, 395, 559, 73),
+        Platform(422, 758, 1084, 79),
+        Platform(524, 837, 223, 102),
+        Platform(1120, 837, 223, 102),
+        Platform(762, 869, 331, 135),
+    ]
+
     running = True
     while running:
+        clock.tick(60)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-        virtual.fill((0, 0, 0))
-
-        platforms = [
-            Platform(180, 490, 800, 10),
-            Platform(180, 410, 170, 10),
-            Platform(400, 410, 350, 10),
-            Platform(180, 410, 10, 80),
-            Platform(80, 210, 50, 10),
-            Platform(400, 210, 50, 10),
-            Platform(80, 600, 50, 10),
-        ]
+        virtual.blit((background), (0, 0))
 
         for p in platforms:
             p.draw(virtual)
