@@ -28,8 +28,6 @@ class Player:
             self.key_right = pygame.K_RIGHT
             self.key_up = pygame.K_UP
             self.key_down = pygame.K_DOWN
-
-            self.color = (0, 255, 0)
             self.x = WIDTH // 2 - self.w // 2 + 60
             self.y = HEIGHT // 2 - self.h // 2 + 60
         else:
@@ -37,8 +35,6 @@ class Player:
             self.key_right = pygame.K_d
             self.key_up = pygame.K_w
             self.key_down = pygame.K_s
-
-            self.color = (255, 0, 0)
             self.x = WIDTH // 2 - self.w // 2
             self.y = HEIGHT // 2 - self.h // 2
 
@@ -47,15 +43,49 @@ class Player:
         self.respawn_x = 500
         self.respawn_y = 290
 
+        self.walk_right = [
+            pygame.image.load("assets/movement_right_1.png").convert_alpha(),
+            pygame.image.load("assets/movement_right_2.png").convert_alpha(),
+            pygame.image.load("assets/movement_right_3.png").convert_alpha(),
+        ]
+        self.walk_left = [
+            pygame.image.load("assets/movement_left_1.png").convert_alpha(),
+            pygame.image.load("assets/movement_left_2.png").convert_alpha(),
+            pygame.image.load("assets/movement_left_3.png").convert_alpha(),
+        ]
+
+        self.jump_img = pygame.image.load("assets/movement_jumping.png").convert_alpha()
+        self.fall_img = pygame.image.load("assets/movement_falling.png").convert_alpha()
+
+        self.walk_right = [
+            pygame.transform.scale(img, (self.w, self.h)) for img in self.walk_right
+        ]
+        self.walk_left = [
+            pygame.transform.scale(img, (self.w, self.h)) for img in self.walk_left
+        ]
+        self.jump_img = pygame.transform.scale(self.jump_img, (self.w, self.h))
+        self.fall_img = pygame.transform.scale(self.fall_img, (self.w, self.h))
+
+        self.facing = "RIGHT"
+        self.frame_index = 0
+        self.anim_timer = 0
+        self.anim_speed = 8
+
+        self.current_img = self.walk_right[0]
+
     def move_logic(self, platforms):
         keys = pygame.key.get_pressed()
 
-        # freeze the player while dead
         if self.dead:
             return
 
+        moving_left = False
+        moving_right = False
+
         if keys[self.key_left]:
             self.x -= 5
+            moving_left = True
+            self.facing = "LEFT"
             for p in platforms:
                 if self.rects_overlap(
                     self.x,
@@ -71,6 +101,8 @@ class Player:
                     break
         if keys[self.key_right]:
             self.x += 5
+            moving_right = True
+            self.facing = "RIGHT"
             for p in platforms:
                 if self.rects_overlap(
                     self.x,
@@ -98,7 +130,7 @@ class Player:
                 self.down_tap_count = 1
             self.last_down_tap = current_time
 
-            if self.is_grounded == True and self.down_tap_count >= 2:
+            if self.is_grounded and self.down_tap_count >= 2:
                 self.drop_through_until = current_time + 0.3
 
                 self.is_grounded = False
@@ -144,8 +176,39 @@ class Player:
                     self.velocity_y = 0
                 break
 
+        self.update_animation(moving_left, moving_right)
+
+    def update_animation(self, moving_left, moving_right):
+        if not self.is_grounded:
+            if self.velocity_y < 0:
+                self.current_img = self.jump_img
+            else:
+                self.current_img = self.fall_img
+            return
+
+        if moving_left:
+            frames = self.walk_left
+        elif moving_right:
+            frames = self.walk_right
+        else:
+            self.current_img = (
+                self.walk_right[0] if self.facing == "RIGHT" else self.walk_left[0]
+            )
+            self.frame_index = 0
+            self.anim_timer = 0
+            return
+
+        self.anim_timer += 1
+        if self.anim_timer >= self.anim_speed:
+            self.anim_timer = 0
+            self.frame_index = (self.frame_index + 1) % len(frames)
+
+        self.current_img = frames[self.frame_index]
+
+    def draw(self, screen):
+        screen.blit(self.current_img, (self.x, self.y))
+
     def rects_overlap(self, px, py, pw, ph, x, y, w, h):
-        # Check if one rectangle is completely to the left, right, above, or below the other
         return not (px + pw <= x or px >= x + w or py + ph <= y or py >= y + h)
 
     def player_respawn(self, screen_height):

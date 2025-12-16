@@ -46,16 +46,8 @@ def main():
         player1.x = max(0, min(VIRTUAL_SIZE[0] - player1.w, player1.x))
         player2.x = max(0, min(VIRTUAL_SIZE[0] - player2.w, player2.x))
 
-        pygame.draw.rect(
-            virtual,
-            player1.color,
-            (player1.x, player1.y, player1.w, player1.h),
-        )
-        pygame.draw.rect(
-            virtual,
-            player2.color,
-            (player2.x, player2.y, player2.w, player2.h),
-        )
+        player1.draw(virtual)
+        player2.draw(virtual)
 
         blit_scaled(screen, virtual)
         pygame.display.flip()
