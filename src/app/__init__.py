@@ -16,8 +16,6 @@ def main():
     player1 = Player(1)
     player2 = Player(2)
 
-    clock = pygame.time.Clock()
-
     running = True
     while running:
         for event in pygame.event.get():
@@ -42,11 +40,11 @@ def main():
         player1.move_logic(platforms)
         player2.move_logic(platforms)
 
-        player1.x = max(0, min(VIRTUAL_SIZE[0] - player1.w, player1.x))
-        player1.y = max(0, min(VIRTUAL_SIZE[1] - player1.h, player1.y))
+        player1.player_respawn(VIRTUAL_SIZE[1])
+        player2.player_respawn(VIRTUAL_SIZE[1])
 
+        player1.x = max(0, min(VIRTUAL_SIZE[0] - player1.w, player1.x))
         player2.x = max(0, min(VIRTUAL_SIZE[0] - player2.w, player2.x))
-        player2.y = max(0, min(VIRTUAL_SIZE[1] - player2.h, player2.y))
 
         pygame.draw.rect(
             virtual,
