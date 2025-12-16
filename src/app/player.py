@@ -77,7 +77,7 @@ class Player:
         self.walk_left = [
             pygame.transform.scale(img, (self.w, self.h)) for img in self.walk_left
         ]
-        self.jump_img = pygame.transform.scale(self.jump_img, (self.w, self.h))
+        self.jump_img = pygame.transform.scale(self.jump_img, (0.75 * self.w, self.h))
         self.fall_img = pygame.transform.scale(self.fall_img, (self.w, self.h))
 
         self.facing = "RIGHT"
@@ -217,9 +217,15 @@ class Player:
     def update_animation(self, moving_left, moving_right):
         if not self.is_grounded:
             if self.velocity_y < 0:
-                self.current_img = self.jump_img
+                if self.facing == "LEFT":
+                    self.current_img = pygame.transform.flip(self.jump_img, True, False)
+                else:
+                    self.current_img = self.jump_img
             else:
-                self.current_img = self.fall_img
+                if self.facing == "RIGHT":
+                    self.current_img = pygame.transform.flip(self.fall_img, True, False)
+                else:
+                    self.current_img = self.fall_img
             return
 
         if moving_left:
