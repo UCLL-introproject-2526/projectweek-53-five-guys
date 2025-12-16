@@ -1,8 +1,8 @@
 import pygame
 import time
 
-PUNCH_WIDTH = 70
-PUNCH_HEIGHT = 20
+PUNCH_WIDTH = 120
+PUNCH_HEIGHT = 50
 
 
 class Player:
@@ -15,8 +15,8 @@ class Player:
         self.lives = 3
 
         self.velocity_y = 0
-        self.gravity = 0.5
-        self.jump_strength = -12
+        self.gravity = 1
+        self.jump_strength = -24
         self.is_grounded = False
         self.jumps_left = 2
         self.max_jumps = 2
@@ -26,6 +26,21 @@ class Player:
         self.drop_through_until = 0
         self.down_held = False
         self.drop_platform = None
+        self.heart_img = pygame.transform.scale(
+            (pygame.image.load("assets/heart_full.png").convert_alpha()), (60, 60)
+        )
+        self.health_100 = pygame.transform.scale(
+            (pygame.image.load("assets/health_100.png").convert_alpha()), (250, 250)
+        )
+        self.health_75 = pygame.transform.scale(
+            (pygame.image.load("assets/health_75.png").convert_alpha()), (250, 250)
+        )
+        self.health_50 = pygame.transform.scale(
+            (pygame.image.load("assets/health_50.png").convert_alpha()), (250, 250)
+        )
+        self.health_25 = pygame.transform.scale(
+            (pygame.image.load("assets/health_25.png").convert_alpha()), (250, 250)
+        )
 
         self.punches = []
         self.punched_on = 0
@@ -94,7 +109,7 @@ class Player:
         moving_right = False
 
         if keys[self.key_left]:
-            self.x -= 5
+            self.x -= 10
             moving_left = True
             self.facing = "LEFT"
             for p in platforms:
@@ -108,10 +123,10 @@ class Player:
                     p.w,
                     p.h,
                 ):
-                    self.x += 5
+                    self.x += 10
                     break
         if keys[self.key_right]:
-            self.x += 5
+            self.x += 10
             moving_right = True
             self.facing = "RIGHT"
             for p in platforms:
@@ -125,7 +140,7 @@ class Player:
                     p.w,
                     p.h,
                 ):
-                    self.x -= 5
+                    self.x -= 10
                     break
 
         if keys[self.key_punch]:
@@ -150,7 +165,7 @@ class Player:
             self.last_down_tap = current_time
 
             if self.is_grounded and self.down_tap_count >= 2:
-                self.drop_through_until = current_time + 0.3
+                self.drop_through_until = current_time + 0.8
 
                 self.is_grounded = False
                 self.velocity_y = max(self.velocity_y, 1)
@@ -241,6 +256,36 @@ class Player:
     def draw(self, screen):
         if (self.lives > 0) and not self.dead:
             screen.blit(self.current_img, (self.x, self.y))
+
+    def draw_hearts(self, screen):
+        if self.player == 1:
+            start_x = 20
+        else:
+            start_x = screen.get_width() - 180
+
+        start_y = 20
+        heart_spacing = 50
+        for i in range(self.lives):
+            screen.blit(self.heart_img, (start_x + (i * heart_spacing), start_y))
+
+    def draw_health_bar(self, screen):
+        if self.player == 1:
+            health_x = 1
+        else:
+            health_x = screen.get_width() - 230
+
+        health_y = 1
+
+        if self.health > 75:
+            health_img = self.health_100
+        elif self.health > 50:
+            health_img = self.health_75
+        elif self.health > 25:
+            health_img = self.health_50
+        else:
+            health_img = self.health_25
+
+        screen.blit(health_img, (health_x, health_y))
 
     def rects_overlap(self, px, py, pw, ph, x, y, w, h):
         return not (px + pw <= x or px >= x + w or py + ph <= y or py >= y + h)

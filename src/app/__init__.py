@@ -23,8 +23,8 @@ def main():
     background = pygame.transform.scale(background, (VIRTUAL_SIZE[0], VIRTUAL_SIZE[1]))
 
     platforms = [
-        Platform(280, 395, 470, 73),
-        Platform(1190, 395, 559, 73),
+        Platform(280, 420, 470, 73),
+        Platform(1190, 420, 559, 73),
         Platform(422, 758, 1084, 79),
         Platform(524, 837, 223, 102),
         Platform(1120, 837, 223, 102),
@@ -33,7 +33,7 @@ def main():
 
     running = True
     while running:
-        clock.tick(60)
+        clock.tick(120)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -41,8 +41,8 @@ def main():
 
         virtual.blit((background), (0, 0))
 
-        # for p in platforms:
-        #     p.draw(virtual)
+        #for p in platforms:
+            #p.draw(virtual)
 
         player1.core_logic(platforms)
         player2.core_logic(platforms)
@@ -94,6 +94,11 @@ def main():
 
         player1.draw(virtual)
         player2.draw(virtual)
+        player1.draw_hearts(virtual)
+        player1.draw_health_bar(virtual)
+        player2.draw_hearts(virtual)
+        player2.draw_health_bar(virtual)
+
 
         blit_scaled(screen, virtual)
         pygame.display.flip()
