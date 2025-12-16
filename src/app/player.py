@@ -1,6 +1,9 @@
 import pygame
 import time
 
+PUNCH_WIDTH = 70
+PUNCH_HEIGHT = 20
+
 
 class Player:
     def __init__(self, player):
@@ -24,11 +27,15 @@ class Player:
         self.down_held = False
         self.drop_platform = None
 
+        self.punches = []
+        self.punched_on = 0
+
         if player == 1:
             self.key_left = pygame.K_LEFT
             self.key_right = pygame.K_RIGHT
             self.key_up = pygame.K_UP
             self.key_down = pygame.K_DOWN
+            self.key_punch = pygame.K_MINUS
             self.x = 550
             self.respawn_x = 550
             self.y = 400
@@ -38,6 +45,7 @@ class Player:
             self.key_right = pygame.K_d
             self.key_up = pygame.K_w
             self.key_down = pygame.K_s
+            self.key_punch = pygame.K_e
             self.x = 1470
             self.respawn_x = 1470
             self.y = 400
@@ -77,7 +85,7 @@ class Player:
 
         self.current_img = self.walk_right[0]
 
-    def move_logic(self, platforms):
+    def core_logic(self, platforms):
         keys = pygame.key.get_pressed()
 
         if self.dead or self.lives <= 0:
@@ -120,6 +128,14 @@ class Player:
                 ):
                     self.x -= 5
                     break
+
+        if keys[self.key_punch]:
+            self.punch()
+
+        for p in self.punches:
+            now = pygame.time.get_ticks()
+            if now - p[2] >= 300:
+                self.punches.remove(p)
 
         if keys[self.key_up] and not self.jump_held and self.jumps_left > 0:
             self.velocity_y = self.jump_strength
@@ -182,6 +198,20 @@ class Player:
 
         self.update_animation(moving_left, moving_right)
 
+    def punch(self):
+        now = pygame.time.get_ticks()
+
+        if now - self.punched_on < 1000:
+            return
+
+        if self.facing == "LEFT":
+            punch_meta = (self.x - PUNCH_HEIGHT, self.y + int(0.3 * self.h), now)
+        else:
+            punch_meta = (self.x + self.w, self.y + int(0.3 * self.h), now)
+
+        self.punched_on = now
+        self.punches.append(punch_meta)
+
     def update_animation(self, moving_left, moving_right):
         if not self.is_grounded:
             if self.velocity_y < 0:
@@ -210,7 +240,7 @@ class Player:
         self.current_img = frames[self.frame_index]
 
     def draw(self, screen):
-        if self.lives > 0:
+        if (self.lives > 0) and not self.dead:
             screen.blit(self.current_img, (self.x, self.y))
 
     def rects_overlap(self, px, py, pw, ph, x, y, w, h):
@@ -221,18 +251,13 @@ class Player:
 
         now = pygame.time.get_ticks()
 
-        # Detect falling off screen
-        if (
-            self.y >= screen_height
-            and not self.dead
-            or self.health <= 0
-            and not self.dead
+        if (self.y >= screen_height and not self.dead) or (
+            self.health <= 0 and not self.dead
         ):
             self.dead = True
             self.death_time = now
             self.lives -= 1
 
-        # Respawn after delay
         if self.dead and now - self.death_time >= RESPAWN_DELAY:
             self.respawn()
 
