@@ -7,39 +7,28 @@ Pixel characters
 Weapons / projectiles  
 Health shown with hearts ❤️  
 
----
-
-## Pixel Work
-- [ ] Create 2 pixel characters
-- [ ] Idle + attack sprites
-- [ ] Borders
-- [ ] Pixel heart icons (health)
-- [ ] Weapon / projectile sprites
-- [ ] Hit effect (optional)
-- [ ] Export as PNG (transparent)
 
 ---
 
 ## Character & Combat Code
-- [ ] `Character` class
-- [ ] movement
-- [ ] direction
-- [ ] Shooting / attacking
+- [ ] `Player` class
+- [ ] Add punch movement
+- [ ] attacking
 - [ ] Taking damage
+- [ ] Health bar pixels style
 
 ---
 
 ## Map & Collision
-- [ ] `Map` class
+- [ ] `Platform` class
 - [ ] Maze layout (tiles or grid)
-- [ ] Wall collision
 - [ ] Keep players inside map
 
 
 ---
 
 ## Game Logic & Controls
-- [ ] Player 1 controls
+- [ ] Player 1 controls (Attack keys)
 - [ ] Player 2 controls (Attack keys)
 - [ ] Health system (hearts go down)
 - [ ] Win condition & restart
