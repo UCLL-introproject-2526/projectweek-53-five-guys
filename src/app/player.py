@@ -14,6 +14,9 @@ class Player:
         self.health = 100
         self.lives = 3
 
+        self.punches = []
+        self.punched_on = 0
+
         self.velocity_y = 0
         self.gravity = 1
         self.jump_strength = -24
@@ -29,21 +32,6 @@ class Player:
         self.heart_img = pygame.transform.scale(
             (pygame.image.load("assets/heart_full.png").convert_alpha()), (60, 60)
         )
-        self.health_100 = pygame.transform.scale(
-            (pygame.image.load("assets/health_100.png").convert_alpha()), (250, 250)
-        )
-        self.health_75 = pygame.transform.scale(
-            (pygame.image.load("assets/health_75.png").convert_alpha()), (250, 250)
-        )
-        self.health_50 = pygame.transform.scale(
-            (pygame.image.load("assets/health_50.png").convert_alpha()), (250, 250)
-        )
-        self.health_25 = pygame.transform.scale(
-            (pygame.image.load("assets/health_25.png").convert_alpha()), (250, 250)
-        )
-
-        self.punches = []
-        self.punched_on = 0
 
         if player == 1:
             self.key_left = pygame.K_LEFT
@@ -258,34 +246,38 @@ class Player:
             screen.blit(self.current_img, (self.x, self.y))
 
     def draw_hearts(self, screen):
-        if self.player == 1:
-            start_x = 20
-        else:
-            start_x = screen.get_width() - 180
-
         start_y = 20
         heart_spacing = 50
-        for i in range(self.lives):
-            screen.blit(self.heart_img, (start_x + (i * heart_spacing), start_y))
+        if self.player == 1:
+            start_x = 20
+            for i in range(self.lives):
+                screen.blit(self.heart_img, (start_x + (i * heart_spacing), start_y))
+        else:
+            start_x = screen.get_width() - 73
+            for i in range(self.lives):
+                screen.blit(self.heart_img, (start_x - (i * heart_spacing), start_y))
 
     def draw_health_bar(self, screen):
         if self.player == 1:
-            health_x = 1
+            health_x = 30
         else:
-            health_x = screen.get_width() - 230
+            health_x = screen.get_width() - 330
 
-        health_y = 1
+        health_y = 100
+        health = max(0, self.health)
 
-        if self.health > 75:
-            health_img = self.health_100
-        elif self.health > 50:
-            health_img = self.health_75
-        elif self.health > 25:
-            health_img = self.health_50
-        else:
-            health_img = self.health_25
+        if self.lives <= 0:
+            return
 
-        screen.blit(health_img, (health_x, health_y))
+        pygame.draw.rect(
+            screen, (34, 34, 34), pygame.Rect(health_x, health_y, 310, 50), 0
+        )
+        pygame.draw.rect(
+            screen,
+            (251, 0, 38),
+            pygame.Rect(health_x + 5, health_y + 5, 3 * health, 40),
+            0,
+        )
 
     def rects_overlap(self, px, py, pw, ph, x, y, w, h):
         return not (px + pw <= x or px >= x + w or py + ph <= y or py >= y + h)
@@ -301,6 +293,7 @@ class Player:
             self.dead = True
             self.death_time = now
             self.lives -= 1
+            self.health = 0
 
         if self.dead and now - self.death_time >= RESPAWN_DELAY:
             self.respawn()
