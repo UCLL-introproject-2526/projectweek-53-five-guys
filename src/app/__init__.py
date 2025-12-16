@@ -16,6 +16,9 @@ def main():
     player1 = Player(1)
     player2 = Player(2)
 
+    punches_p1 = []
+    punches_p2 = []
+
     background = pygame.image.load("assets/background.png").convert()
     background = pygame.transform.scale(background, (VIRTUAL_SIZE[0], VIRTUAL_SIZE[1]))
 
@@ -41,8 +44,47 @@ def main():
         # for p in platforms:
         #     p.draw(virtual)
 
-        player1.move_logic(platforms)
-        player2.move_logic(platforms)
+        player1.core_logic(platforms)
+        player2.core_logic(platforms)
+        PUNCH_WIDTH = 70
+        PUNCH_HEIGHT = 20
+        for p in player1.punches:
+            pygame.draw.rect(
+                virtual,
+                (0, 255, 0),
+                (p[0], p[1], PUNCH_WIDTH, PUNCH_HEIGHT),
+            )
+            if player1.rects_overlap(
+                player2.x,
+                player2.y,
+                player2.w,
+                player2.h,
+                p[0],
+                p[1],
+                PUNCH_WIDTH,
+                PUNCH_HEIGHT,
+            ):
+                player2.health -= 25
+                player1.punches.remove(p)
+
+        for p in player2.punches:
+            pygame.draw.rect(
+                virtual,
+                (255, 0, 0),
+                (p[0], p[1], PUNCH_WIDTH, PUNCH_HEIGHT),
+            )
+            if player2.rects_overlap(
+                player1.x,
+                player1.y,
+                player1.w,
+                player1.h,
+                p[0],
+                p[1],
+                PUNCH_WIDTH,
+                PUNCH_HEIGHT,
+            ):
+                player1.health -= 25
+                player2.punches.remove(p)
 
         player1.check_death(VIRTUAL_SIZE[1])
         player2.check_death(VIRTUAL_SIZE[1])
