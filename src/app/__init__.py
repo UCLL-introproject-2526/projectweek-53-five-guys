@@ -3,6 +3,7 @@ from .platforms import Platform
 from .player import Player
 
 
+
 def main():
     pygame.init()
 
@@ -14,12 +15,13 @@ def main():
     player1 = Player(1)
     player2 = Player(2)
 
-    pygame.time.Clock().tick(60)
+    clock = pygame.time.Clock()
 
-    jump = 0
 
     running = True
     while running:
+        clock.tick(60)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -42,11 +44,13 @@ def main():
         player1.move_logic(platforms)
         player2.move_logic(platforms)
 
+        player1.player_respawn(HEIGHT)
+        player2.player_respawn(HEIGHT)
+
         player1.x = max(0, min(WIDTH - player1.w, player1.x))
-        player1.y = max(0, min(HEIGHT - player1.h, player1.y))
 
         player2.x = max(0, min(WIDTH - player2.w, player2.x))
-        player2.y = max(0, min(HEIGHT - player2.h, player2.y))
+        
 
         pygame.draw.rect(
             screen,
@@ -59,3 +63,5 @@ def main():
             (player2.x, player2.y, player2.w, player2.h),
         )
         pygame.display.flip()
+
+main()
