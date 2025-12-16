@@ -20,7 +20,7 @@ def main():
     background = pygame.transform.scale(background, (VIRTUAL_SIZE[0], VIRTUAL_SIZE[1]))
 
     platforms = [
-        Platform(270, 395, 559, 73),
+        Platform(280, 395, 470, 73),
         Platform(1190, 395, 559, 73),
         Platform(422, 758, 1084, 79),
         Platform(524, 837, 223, 102),
@@ -38,14 +38,14 @@ def main():
 
         virtual.blit((background), (0, 0))
 
-        for p in platforms:
-            p.draw(virtual)
+        # for p in platforms:
+        #     p.draw(virtual)
 
         player1.move_logic(platforms)
         player2.move_logic(platforms)
 
-        player1.player_respawn(VIRTUAL_SIZE[1])
-        player2.player_respawn(VIRTUAL_SIZE[1])
+        player1.check_death(VIRTUAL_SIZE[1])
+        player2.check_death(VIRTUAL_SIZE[1])
 
         player1.x = max(0, min(VIRTUAL_SIZE[0] - player1.w, player1.x))
         player2.x = max(0, min(VIRTUAL_SIZE[0] - player2.w, player2.x))

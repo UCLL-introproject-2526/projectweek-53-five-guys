@@ -5,10 +5,11 @@ import time
 class Player:
     def __init__(self, player):
         self.player = player
-        self.w = 50
-        self.h = 50
-        WIDTH = 1024
-        HEIGHT = 768
+        self.w = 100
+        self.h = 100
+
+        self.health = 100
+        self.lives = 3
 
         self.velocity_y = 0
         self.gravity = 0.5
@@ -28,19 +29,22 @@ class Player:
             self.key_right = pygame.K_RIGHT
             self.key_up = pygame.K_UP
             self.key_down = pygame.K_DOWN
-            self.x = WIDTH // 2 - self.w // 2 + 60
-            self.y = HEIGHT // 2 - self.h // 2 + 60
+            self.x = 550
+            self.respawn_x = 550
+            self.y = 400
+            self.respawn_y = 400
         else:
             self.key_left = pygame.K_a
             self.key_right = pygame.K_d
             self.key_up = pygame.K_w
             self.key_down = pygame.K_s
-            self.x = WIDTH // 2 - self.w // 2
-            self.y = HEIGHT // 2 - self.h // 2
+            self.x = 1470
+            self.respawn_x = 1470
+            self.y = 400
+            self.respawn_y = 400
 
         self.dead = False
         self.death_time = 0
-        self.respawn_x = 500
         self.respawn_y = 290
 
         self.walk_right = [
@@ -76,7 +80,7 @@ class Player:
     def move_logic(self, platforms):
         keys = pygame.key.get_pressed()
 
-        if self.dead:
+        if self.dead or self.lives <= 0:
             return
 
         moving_left = False
@@ -206,23 +210,38 @@ class Player:
         self.current_img = frames[self.frame_index]
 
     def draw(self, screen):
-        screen.blit(self.current_img, (self.x, self.y))
+        if self.lives > 0:
+            screen.blit(self.current_img, (self.x, self.y))
 
     def rects_overlap(self, px, py, pw, ph, x, y, w, h):
         return not (px + pw <= x or px >= x + w or py + ph <= y or py >= y + h)
 
-    def player_respawn(self, screen_height):
+    def check_death(self, screen_height):
         RESPAWN_DELAY = 1000  # 1 second
-        RESPAWN_OFFSET_Y = 60
+
         now = pygame.time.get_ticks()
 
         # Detect falling off screen
-        if self.y >= screen_height and not self.dead:
+        if (
+            self.y >= screen_height
+            and not self.dead
+            or self.health <= 0
+            and not self.dead
+        ):
             self.dead = True
             self.death_time = now
+            self.lives -= 1
 
         # Respawn after delay
         if self.dead and now - self.death_time >= RESPAWN_DELAY:
-            self.x = self.respawn_x
-            self.y = self.respawn_y - RESPAWN_OFFSET_Y
-            self.dead = False
+            self.respawn()
+
+    def respawn(self):
+        RESPAWN_OFFSET_Y = 60
+
+        self.x = self.respawn_x
+        self.y = self.respawn_y - RESPAWN_OFFSET_Y
+
+        self.health = 100
+
+        self.dead = False
