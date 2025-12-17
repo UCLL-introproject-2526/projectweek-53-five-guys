@@ -10,12 +10,18 @@ VIRTUAL_SIZE = (1920, 1080)
 
 def main():
     pygame.init()
+    pygame.mixer.init()
 
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     virtual = pygame.Surface(VIRTUAL_SIZE)
     clock = pygame.time.Clock()
 
+    pygame.mixer.music.load("assets/audio/background_menu_song.wav") 
+    pygame.mixer.music.play(-1) # -1 means loop forever
+
     player1_name, player2_name, chosen_bg = startpage(virtual, screen)
+
+    pygame.mixer.music.stop()
 
     player1 = Player(1)
     player2 = Player(2)

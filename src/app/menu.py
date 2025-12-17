@@ -17,6 +17,7 @@ def startpage(screen, real):
     bg_files = ["assets/background.png", "assets/background2.png", "assets/background3.png"]
 
     input_font = pygame.font.Font("assets/font/PressStart2P-Regular.ttf", 24)
+    #to use later
     title_font = pygame.font.Font("assets/font/PressStart2P-Regular.ttf", 32)
 
     char1_img = pygame.image.load("assets/character/player_1_poster_choosing.png").convert_alpha()
@@ -36,11 +37,11 @@ def startpage(screen, real):
         img = pygame.image.load(path).convert_alpha()
         bg_thumbnails.append(pygame.transform.smoothscale(img, (200, 110)))
         rect = pygame.Rect(0, 0, 200, 110)
-        rect.center = (screen_w // 2, 450 + (i * 140))
+        rect.center = (screen_w // 2, char1_rect.top + 220 + (i * 140))
         bg_rects.append(rect)
 
     start_img = pygame.transform.scale(pygame.image.load("assets/button/start_game.png").convert_alpha(), (360, 75))
-    start_rect = start_img.get_rect(center=(screen_w // 2, 250))
+    start_rect = start_img.get_rect(center=(screen_w // 2, char1_rect.top - 50))
 
     while True:
         mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), real)
@@ -71,8 +72,8 @@ def startpage(screen, real):
         bg_preview.set_alpha(150)
         screen.blit(bg_preview, (0, 0))
         
-        bg_title = title_font.render("SELECT BACKGROUND", True, (255, 255, 255))
-        screen.blit(bg_title, bg_title.get_rect(center=(screen_w // 2, 380)))
+        bg_title = input_font.render("SELECT BACKGROUND", True, (255, 255, 255))
+        screen.blit(bg_title, bg_title.get_rect(center=(screen_w // 2, char1_rect.top + 140)))
         for i, r in enumerate(bg_rects):
             screen.blit(bg_thumbnails[i], r.topleft)
             if i == selected_bg_index: pygame.draw.rect(screen, (0, 255, 255), r, 4)
