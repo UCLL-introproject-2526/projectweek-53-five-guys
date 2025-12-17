@@ -1,14 +1,16 @@
 import pygame
 from .platforms import Platform
 from .player import Player
-from .powerups import SpeedBoost
 from .menu import startpage
 from .menu import screen_to_virtual
+from .powerups import SpeedBoost, Heart
+
 
 VIRTUAL_SIZE = (1920, 1080)
 
 
 def main():
+    # pygame.mixer.init()
     pygame.init()
 
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
@@ -34,6 +36,12 @@ def main():
     BOOST_EVENT = pygame.USEREVENT + 1
     pygame.time.set_timer(BOOST_EVENT, 13000)  # spawn every 13 seconds
 
+    heart = None
+    HEART_EVENT = pygame.USEREVENT + 2
+    pygame.time.set_timer(
+        HEART_EVENT, 20000
+    )  # spawn every 20 seconds (adjust as you like)
+
     platforms = [
         Platform(280, 420, 470, 73, True),
         Platform(1190, 420, 559, 73, True),
@@ -54,6 +62,14 @@ def main():
                 running = False
             if event.type == BOOST_EVENT and speed_boost is None:
                 speed_boost = SpeedBoost()
+            if event.type == HEART_EVENT and heart is None:
+                if random.random() <= 0.3:
+                    heart = Heart()
+
+        virtual.blit((background), (0, 0))
+
+        # for p in platforms:
+        # p.draw(virtual)
 
         player1.core_logic(platforms, events)
         player2.core_logic(platforms, events)
@@ -109,6 +125,7 @@ def main():
             speed_boost.check_collision(player1)
             speed_boost.check_collision(player2)
 
+        # Fell off screen without being collected
         if speed_boost and speed_boost.state == "USED":
             speed_boost = None
 
@@ -122,6 +139,17 @@ def main():
 
         if game_quit_rect.collidepoint(mouse_pos) and mouse_click:
             running = False
+
+        if heart:
+            heart.update(platforms)  # falls down / lands on platforms
+            heart.draw(virtual)  # draw the heart
+
+            heart.check_collision(player1)
+            heart.check_collision(player2)
+
+            # Remove heart if collected or expired
+            if heart.state == "USED":
+                heart = None
 
         blit_scaled(screen, virtual)
         pygame.display.flip()

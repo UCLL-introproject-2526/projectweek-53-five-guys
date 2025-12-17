@@ -89,3 +89,18 @@ class SpeedBoost(PowerUp):
             sfx.play()
         except pygame.error:
             pass
+
+
+class Heart(PowerUp):
+    def __init__(self):
+        self.x = random.randint(50, 1920 - 50)
+        self.heal_amount = 1
+
+    @property
+    def image(self):
+        img = pygame.image.load("assets/heart_full.png").convert_alpha()
+        return pygame.transform.scale(img, (self.size, self.size))
+
+    def apply(self, player):
+        self.state = "USED"
+        player.lives += self.heal_amount
