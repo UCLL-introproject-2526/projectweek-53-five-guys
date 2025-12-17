@@ -20,7 +20,7 @@ def startpage(screen, real):
 
     input_font = pygame.font.Font("assets/font/Kaijuz.ttf", 24)
 
-    # background only (logo removed)
+    # background only (logo removed)fa
     menu_bg = pygame.image.load("assets/background.png").convert_alpha()
     menu_bg = pygame.transform.scale(menu_bg, screen.get_size())
     menu_bg.set_alpha(200)
