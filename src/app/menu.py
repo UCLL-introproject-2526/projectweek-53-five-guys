@@ -25,8 +25,8 @@ def startpage(screen, real):
     menu_bg = pygame.transform.scale(menu_bg, screen.get_size())
     menu_bg.set_alpha(200)
 
-    start_img = pygame.image.load("assets/button/start_game_logo.png").convert_alpha()
-    quit_img = pygame.image.load("assets/button/quit_game_logo.png").convert_alpha()
+    start_img = pygame.image.load("assets/button/start_game.png").convert_alpha()
+    quit_img = pygame.image.load("assets/button/quit_game.png").convert_alpha()
 
     start_img = pygame.transform.scale(start_img, (360, 75))
     quit_img = pygame.transform.scale(quit_img, (360, 75))
