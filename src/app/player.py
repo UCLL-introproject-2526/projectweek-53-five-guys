@@ -1,6 +1,7 @@
 import pygame
 import time
 
+
 PUNCH_WIDTH = 120
 PUNCH_HEIGHT = 50
 
@@ -38,7 +39,7 @@ class Player:
             self.key_right = pygame.K_RIGHT
             self.key_up = pygame.K_UP
             self.key_down = pygame.K_DOWN
-            self.key_punch = pygame.K_MINUS
+            self.key_punch = pygame.K_m
             self.x = 550
             self.respawn_x = 550
             self.y = 400
@@ -109,7 +110,7 @@ class Player:
 
         self.current_img = self.walk_right[0]
 
-    def core_logic(self, platforms):
+    def core_logic(self, platforms, events):
         keys = pygame.key.get_pressed()
 
         if self.dead or self.lives <= 0:
@@ -153,8 +154,11 @@ class Player:
                     self.x -= 10
                     break
 
-        if keys[self.key_punch]:
-            self.punch()
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == self.key_punch:
+                    self.punch()
+
 
         
         now = pygame.time.get_ticks()
@@ -166,6 +170,11 @@ class Player:
             self.velocity_y = self.jump_strength
             self.jumps_left -= 1
         self.jump_held = keys[self.key_up]
+
+        if keys[self.key_down] and not self.is_grounded:
+            if self.velocity_y < 0 :
+                self.velocity_y = 0
+            self.velocity_y += 3
 
         current_time = time.time()
         if keys[self.key_down] and not self.down_held:
@@ -186,6 +195,7 @@ class Player:
 
         self.velocity_y += self.gravity
         self.y += self.velocity_y
+            
 
         self.is_grounded = False
         for p in platforms:

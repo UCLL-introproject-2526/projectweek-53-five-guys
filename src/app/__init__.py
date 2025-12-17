@@ -35,7 +35,8 @@ def main():
     while running:
         clock.tick(120)
 
-        for event in pygame.event.get():
+        events = pygame.event.get()
+        for event in events:
             if event.type == pygame.QUIT:
                 running = False
 
@@ -44,8 +45,8 @@ def main():
         #for p in platforms:
             #p.draw(virtual)
 
-        player1.core_logic(platforms)
-        player2.core_logic(platforms)
+        player1.core_logic(platforms, events)
+        player2.core_logic(platforms, events)
         PUNCH_WIDTH = 70
         PUNCH_HEIGHT = 20
         for p in player1.punches:
