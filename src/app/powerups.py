@@ -73,3 +73,4 @@ class SpeedBoost:
             if now - self.start_time >= self.duration:
                 player.speed = player.base_speed
                 self.start_time= None
+
