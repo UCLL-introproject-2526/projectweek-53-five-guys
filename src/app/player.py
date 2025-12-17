@@ -236,7 +236,12 @@ class Player:
         self.update_animation(moving_left, moving_right)
 
     def punch(self):
+        test_sfx = pygame.mixer.Sound("assets/audio/test_audio.wav")
+        test_sfx.set_volume(1.0)
+
         now = pygame.time.get_ticks()
+        test_sfx.set_volume(1.0)
+        test_sfx.play()
 
         if now - self.punched_on < 300:
             return
