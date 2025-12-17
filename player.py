@@ -1,6 +1,7 @@
 import pygame
 import time
 import math
+import random
 from powerups import Katana, SpeedBoost
 
 
@@ -174,6 +175,9 @@ class Player:
             pygame.transform.scale(img, (self.w, self.h))
             for img in self.katana_attack_left
         ]
+        self.blood_img = pygame.image.load("assets/blood.png").convert_alpha()
+        self.blood_img = pygame.transform.scale(self.blood_img, (80, 80))
+        self.blood_splashes = []
 
         self.facing = "RIGHT"
         self.frame_index = 0
@@ -424,6 +428,16 @@ class Player:
         self.got_hit = True
         if isinstance(weapon, Katana):
             self.health -= 50
+
+            num_splashes = random.randint(3, 5)
+            for _ in range(num_splashes):
+                splash_x = self.x + random.randint(int(0.1 * self.w), int(0.9 * self.w))
+                splash_y = self.y + random.randint(int(0.1 * self.h), int(0.9 * self.h))
+                rotation = random.randint(0, 360)
+                scale = random.uniform(0.7, 1.3)
+                self.blood_splashes.append(
+                    (splash_x, splash_y, pygame.time.get_ticks(), rotation, scale)
+                )
         else:
             self.health -= 25
 
@@ -496,6 +510,26 @@ class Player:
                     if self.facing == "LEFT"
                     else self.katana_attack_right
                 )
+                now = pygame.time.get_ticks()
+                for splash in self.blood_splashes[:]:
+                    age = now - splash[2]
+                    if age > 800:
+                        self.blood_splashes.remove(splash)
+                    else:
+                        alpha = int(255 * max(0, 1 - (age / 800) ** 0.6))
+                        rotation = splash[3]
+                        scale = splash[4]
+
+                        blood_scaled = pygame.transform.scale(
+                            self.blood_img, (int(80 * scale), int(80 * scale))
+                        )
+                        blood_rotated = pygame.transform.rotate(blood_scaled, rotation)
+                        blood_copy = blood_rotated.copy()
+                        blood_copy.set_alpha(alpha)
+
+                        # Center the splash
+                        rect = blood_copy.get_rect(center=(splash[0], splash[1]))
+                        screen.blit(blood_copy, rect)
             else:
                 frames = (
                     self.attack_left if self.facing == "LEFT" else self.attack_right
@@ -681,6 +715,27 @@ class Player:
                 (rel_x_cen - 25, rel_y_cen - 25),
             )
 
+    def draw_blood(self, screen):
+        now = pygame.time.get_ticks()
+        for splash in self.blood_splashes[:]:
+            age = now - splash[2]
+            if age > 800:
+                self.blood_splashes.remove(splash)
+            else:
+                alpha = int(255 * max(0, 1 - (age / 800) ** 0.6))
+                rotation = splash[3]
+
+                scale = splash[4]
+                blood_scaled = pygame.transform.scale(
+                    self.blood_img, (int(80 * scale), int(80 * scale))
+                )
+                blood_rotated = pygame.transform.rotate(blood_scaled, rotation)
+                blood_copy = blood_rotated.copy()
+                blood_copy.set_alpha(alpha)
+
+                rect = blood_copy.get_rect(center=(splash[0], splash[1]))
+                screen.blit(blood_copy, rect)
+
     def rects_overlap(self, px, py, pw, ph, x, y, w, h):
         return not (px + pw <= x or px >= x + w or py + ph <= y or py >= y + h)
 
@@ -704,6 +759,20 @@ class Player:
             self.death_time = now
             self.lives -= 1
             self.health = 0
+
+            num_splashes = random.randint(3, 5)
+            for _ in range(num_splashes):
+                splash_x = self.x + random.randint(
+                    int(-0.2 * self.w), int(1.2 * self.w)
+                )
+                splash_y = self.y + random.randint(
+                    int(-0.2 * self.h), int(1.2 * self.h)
+                )
+                rotation = random.randint(0, 360)
+                scale = random.uniform(1.0, 2.0)
+                self.blood_splashes.append(
+                    (splash_x, splash_y, pygame.time.get_ticks(), rotation, scale)
+                )
 
             self.velocity_y -= 20
 

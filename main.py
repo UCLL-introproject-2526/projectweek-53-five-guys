@@ -121,9 +121,11 @@ async def main():
         player1.draw_hearts(virtual)
         player1.draw_health_bar(virtual)
         player1.draw_powerups(virtual)
+        player1.draw_blood(virtual)
         player2.draw_hearts(virtual)
         player2.draw_health_bar(virtual)
         player2.draw_powerups(virtual)
+        player2.draw_blood(virtual)
 
         if katana:
             katana.update(platforms)
