@@ -48,6 +48,7 @@ class Player:
             self.key_up = pygame.K_UP
             self.key_down = pygame.K_DOWN
             self.key_punch = pygame.K_m
+            self.key_dash = pygame.K_n
             self.x = 550
             self.respawn_x = 550
             self.y = 400
@@ -58,6 +59,7 @@ class Player:
             self.key_up = pygame.K_w
             self.key_down = pygame.K_s
             self.key_punch = pygame.K_e
+            self.key_dash = pygame.K_r
             self.x = 1470
             self.respawn_x = 1470
             self.y = 400
@@ -116,6 +118,16 @@ class Player:
             pygame.transform.scale(img, (self.w, self.h)) for img in self.attack_left
         ]
 
+        # Dash images (single frame per facing)
+        self.dash_right = pygame.transform.scale(
+            pygame.image.load(f"assets/player_{player}/dash/dash_right.png").convert_alpha(),
+            (self.w, self.h)
+        )
+        self.dash_left = pygame.transform.scale(
+            pygame.image.load(f"assets/player_{player}/dash/dash_left.png").convert_alpha(),
+            (self.w, self.h)
+        )
+
         self.facing = "RIGHT"
         self.frame_index = 0
         self.anim_timer = 0
@@ -128,10 +140,21 @@ class Player:
         self.attack_frame_duration_ms = 90
         self.last_attack_frame_at = 0
 
+        self.is_dashing = False
+        self.dash_speed = 28
+        self.dash_duration_ms = 220
+        self.dash_cooldown_ms = 800
+        self.dash_until = 0
+        self.last_dash_at = -9999
+        self.invincible_until = 0
+        self.dash_frame = 0
+        self.dash_anim_speed = 4
+
         self.current_img = self.walk_right[0]
 
     def core_logic(self, platforms, events):
         keys = pygame.key.get_pressed()
+        now_ms = pygame.time.get_ticks()
 
         if self.dead or self.lives <= 0:
             return
@@ -139,6 +162,22 @@ class Player:
         moving_left = False
         moving_right = False
 
+        
+        if self.is_dashing:
+            dx = self.dash_speed if self.facing == "RIGHT" else -self.dash_speed
+            self.x += dx
+            for p in platforms:
+                if self.rects_overlap(
+                    self.x, self.y, self.w, self.h,
+                    p.x, p.y, p.w, p.h,
+                ):
+                    self.x -= dx
+                    self.end_dash()
+                    break
+            if now_ms >= self.dash_until:
+                self.end_dash()
+            moving_left = self.facing == "LEFT"
+            moving_right = self.facing == "RIGHT"
         if keys[self.key_left]:
             self.x -= 10
             moving_left = True
@@ -178,6 +217,9 @@ class Player:
             if event.type == pygame.KEYDOWN:
                 if event.key == self.key_punch:
                     self.punch()
+                if event.key == self.key_dash:
+                    self.start_dash(now_ms)
+
 
         for p in self.punches:
             now = pygame.time.get_ticks()
@@ -253,6 +295,8 @@ class Player:
 
         if now - self.punched_on < 300:
             return
+        if self.is_dashing:
+            return
 
         self.is_attacking = True
         self.attack_frame = 0
@@ -269,7 +313,11 @@ class Player:
         self.punches.append(punch_meta)
 
     def update_animation(self, moving_left, moving_right):
-       
+        
+        if self.is_dashing:
+            self.current_img = self.dash_left if self.facing == "LEFT" else self.dash_right
+            return
+
         if self.is_attacking:
             frames = self.attack_left if self.facing == "LEFT" else self.attack_right
             now = pygame.time.get_ticks()
@@ -386,3 +434,22 @@ class Player:
         self.health = 100
 
         self.dead = False
+
+    def start_dash(self, now_ms):
+        if self.is_dashing:
+            return
+        if now_ms - self.last_dash_at < self.dash_cooldown_ms:
+            return
+        self.is_dashing = True
+        self.dash_until = now_ms + self.dash_duration_ms
+        self.last_dash_at = now_ms
+        self.invincible_until = self.dash_until
+        self.is_attacking = False
+        self.attack_frame = 0
+        self.anim_timer = 0
+
+    def end_dash(self):
+        self.is_dashing = False
+
+    def is_invincible(self):
+        return pygame.time.get_ticks() < self.invincible_until
