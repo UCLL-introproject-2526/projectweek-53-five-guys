@@ -91,18 +91,18 @@ def main():
         player2.draw(virtual, opponent_dead=(player1.dead or player1.lives <= 0))
         player1.draw_hearts(virtual)
         player1.draw_health_bar(virtual)
+        player1.draw_powerups(virtual)
         player2.draw_hearts(virtual)
         player2.draw_health_bar(virtual)
+        player2.draw_powerups(virtual)
 
-        # ---------- SPEED BOOST LOGIC ----------
         if speed_boost:
-            speed_boost.update(platforms)  # move down to platforms
-            speed_boost.draw(virtual)  # draw yellow square
+            speed_boost.update(platforms)
+            speed_boost.draw(virtual)
 
             speed_boost.check_collision(player1)
             speed_boost.check_collision(player2)
 
-        # Fell off screen without being collected
         if speed_boost and speed_boost.state == "USED":
             speed_boost = None
 
