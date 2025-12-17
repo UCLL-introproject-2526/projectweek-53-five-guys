@@ -1,6 +1,7 @@
 import pygame
 import time
 
+
 PUNCH_WIDTH = 120
 PUNCH_HEIGHT = 50
 
@@ -16,6 +17,9 @@ class Player:
 
         self.punches = []
         self.punched_on = 0
+        self.got_hit = False
+        self.hit_on = 0
+        self.hit_from = "RIGHT"
 
         self.velocity_y = 0
         self.gravity = 1
@@ -32,13 +36,21 @@ class Player:
         self.heart_img = pygame.transform.scale(
             (pygame.image.load("assets/heart_full.png").convert_alpha()), (60, 60)
         )
+        self.death_img = pygame.transform.scale(
+            pygame.image.load(f"assets/player_{player}/death.png").convert_alpha(),
+            (self.w, self.h),
+        )
+        self.victory_img = pygame.transform.scale(
+            pygame.image.load(f"assets/player_{player}/victory.png").convert_alpha(),
+            (self.w, self.h),
+        )
 
         if player == 1:
             self.key_left = pygame.K_LEFT
             self.key_right = pygame.K_RIGHT
             self.key_up = pygame.K_UP
             self.key_down = pygame.K_DOWN
-            self.key_punch = pygame.K_MINUS
+            self.key_punch = pygame.K_m
             self.x = 550
             self.respawn_x = 550
             self.y = 400
@@ -76,12 +88,19 @@ class Player:
         ]
 
         if self.player == 1:
-            self.jump_img = pygame.image.load(f"{base}/movement_jumping.png").convert_alpha()
-            self.fall_img = pygame.image.load(f"{base}/movement_falling.png").convert_alpha()
+            self.jump_img = pygame.image.load(
+                f"{base}/movement_jumping.png"
+            ).convert_alpha()
+            self.fall_img = pygame.image.load(
+                f"{base}/movement_falling.png"
+            ).convert_alpha()
         else:
-            self.jump_img = pygame.image.load(f"{base}/movement_jumping.png").convert_alpha()
-            self.fall_img = pygame.image.load(f"{base}/movement_falling.png").convert_alpha()
-        
+            self.jump_img = pygame.image.load(
+                f"{base}/movement_jumping.png"
+            ).convert_alpha()
+            self.fall_img = pygame.image.load(
+                f"{base}/movement_falling.png"
+            ).convert_alpha()
 
         self.walk_right = [
             pygame.transform.scale(img, (self.w, self.h)) for img in self.walk_right
@@ -93,12 +112,12 @@ class Player:
         self.fall_img = pygame.transform.scale(self.fall_img, (self.w, self.h))
 
         self.attack_right = [
-            pygame.image.load(f"assets/attack/attack_right_{i}.png").convert_alpha()
-            for i in range(1,5)
+            pygame.image.load(f"{base}/attack/attack_right_{i}.png").convert_alpha()
+            for i in range(1, 4)
         ]
         self.attack_left = [
-            pygame.image.load(f"assets/attack/attack_left_{i}.png").convert_alpha()
-            for i in range(1,5)
+            pygame.image.load(f"{base}/attack/attack_left_{i}.png").convert_alpha()
+            for i in range(1, 4)
         ]
         self.attack_right = [
             pygame.transform.scale(img, (self.w, self.h)) for img in self.attack_right
@@ -115,22 +134,22 @@ class Player:
         self.is_attacking = False
         self.attack_frame = 0
         self.attack_anim_speed = 5
-        
+
         self.attack_frame_duration_ms = 90
         self.last_attack_frame_at = 0
 
         self.current_img = self.walk_right[0]
 
-    def core_logic(self, platforms):
+    def core_logic(self, platforms, events):
         keys = pygame.key.get_pressed()
 
-        if self.dead or self.lives <= 0:
+        if self.lives <= 0:
             return
 
         moving_left = False
         moving_right = False
 
-        if keys[self.key_left]:
+        if keys[self.key_left] and not self.dead:
             self.x -= 10
             moving_left = True
             self.facing = "LEFT"
@@ -147,7 +166,7 @@ class Player:
                 ):
                     self.x += 10
                     break
-        if keys[self.key_right]:
+        if keys[self.key_right] and not self.dead:
             self.x += 10
             moving_right = True
             self.facing = "RIGHT"
@@ -165,22 +184,33 @@ class Player:
                     self.x -= 10
                     break
 
-        if keys[self.key_punch]:
-            self.punch()
+        for event in events:
+            if event.type == pygame.KEYDOWN and not self.dead:
+                if event.key == self.key_punch:
+                    self.punch()
 
-        
-        now = pygame.time.get_ticks()
-        for p in self.punches[:]:
-            if now - p[2] >= 150:
+        for p in self.punches:
+            now = pygame.time.get_ticks()
+            if now - p[2] >= 300:
                 self.punches.remove(p)
 
-        if keys[self.key_up] and not self.jump_held and self.jumps_left > 0:
+        if (
+            keys[self.key_up]
+            and not self.jump_held
+            and self.jumps_left > 0
+            and not self.dead
+        ):
             self.velocity_y = self.jump_strength
             self.jumps_left -= 1
         self.jump_held = keys[self.key_up]
 
+        if keys[self.key_down] and not self.is_grounded and not self.dead:
+            if self.velocity_y < 0:
+                self.velocity_y = 0
+            self.velocity_y += 3
+
         current_time = time.time()
-        if keys[self.key_down] and not self.down_held:
+        if keys[self.key_down] and not self.down_held and not self.dead:
             if current_time - self.last_down_tap < 0.25:
                 self.down_tap_count += 1
             else:
@@ -200,40 +230,59 @@ class Player:
         self.y += self.velocity_y
 
         self.is_grounded = False
-        for p in platforms:
-            if (
-                current_time < self.drop_through_until
-                and self.drop_platform is not None
-            ):
+        if not self.dead:
+            for p in platforms:
                 if (
-                    p.x == self.drop_platform.x
-                    and p.y == self.drop_platform.y
-                    and p.w == self.drop_platform.w
-                    and p.h == self.drop_platform.h
+                    current_time < self.drop_through_until
+                    and self.drop_platform is not None
                 ):
-                    continue
-            if self.rects_overlap(
-                self.x,
-                self.y,
-                self.w,
-                self.h,
-                p.x,
-                p.y,
-                p.w,
-                p.h,
-            ):
-                if self.velocity_y > 0:
-                    self.y = p.y - self.h
-                    self.velocity_y = 0
-                    self.is_grounded = True
-                    self.jumps_left = self.max_jumps
-                    self.drop_platform = p  # Store platform when landing
-                elif self.velocity_y < 0:
-                    self.y = p.y + p.h
-                    self.velocity_y = 0
-                break
+                    if (
+                        p.x == self.drop_platform.x
+                        and p.y == self.drop_platform.y
+                        and p.w == self.drop_platform.w
+                        and p.h == self.drop_platform.h
+                    ):
+                        continue
+                if self.rects_overlap(
+                    self.x,
+                    self.y,
+                    self.w,
+                    self.h,
+                    p.x,
+                    p.y,
+                    p.w,
+                    p.h,
+                ):
+                    if self.velocity_y > 0:
+                        self.y = p.y - self.h
+                        self.velocity_y = 0
+                        self.is_grounded = True
+                        self.jumps_left = self.max_jumps
+                        self.drop_platform = p  # Store platform when landing
+                    elif self.velocity_y < 0:
+                        self.y = p.y + p.h
+                        self.velocity_y = 0
+                    break
+
+        now = pygame.time.get_ticks()
+        ratio = now - self.hit_on
+        if self.got_hit and (ratio < 300) and not self.dead:
+            if self.hit_from == "RIGHT":
+                self.x += int(ratio / 10)
+                if ratio < 70:
+                    self.velocity_y -= 5
+            else:
+                self.x -= int(ratio / 10)
+                if ratio < 70:
+                    self.velocity_y -= 5
 
         self.update_animation(moving_left, moving_right)
+
+    def hit(self, hit_from):
+        self.hit_on = pygame.time.get_ticks()
+        self.hit_from = hit_from
+        self.got_hit = True
+        self.health -= 25
 
     def punch(self):
         now = pygame.time.get_ticks()
@@ -245,7 +294,9 @@ class Player:
         self.attack_frame = 0
         self.anim_timer = 0
         self.last_attack_frame_at = now
-        self.current_img = self.attack_left[0] if self.facing == "LEFT" else self.attack_right[0]
+        self.current_img = (
+            self.attack_left[0] if self.facing == "LEFT" else self.attack_right[0]
+        )
 
         if self.facing == "LEFT":
             punch_meta = (self.x - PUNCH_WIDTH, self.y + int(0.3 * self.h), now)
@@ -256,7 +307,6 @@ class Player:
         self.punches.append(punch_meta)
 
     def update_animation(self, moving_left, moving_right):
-       
         if self.is_attacking:
             frames = self.attack_left if self.facing == "LEFT" else self.attack_right
             now = pygame.time.get_ticks()
@@ -266,8 +316,12 @@ class Player:
                 if self.attack_frame >= len(frames):
                     self.is_attacking = False
                     self.attack_frame = 0
-                    
-                    self.current_img = self.walk_left[0] if self.facing == "LEFT" else self.walk_right[0]
+
+                    self.current_img = (
+                        self.walk_left[0]
+                        if self.facing == "LEFT"
+                        else self.walk_right[0]
+                    )
                 else:
                     self.current_img = frames[self.attack_frame]
             return
@@ -290,7 +344,9 @@ class Player:
         elif moving_right:
             frames = self.walk_right
         else:
-            self.current_img = self.walk_right[0] if self.facing == "RIGHT" else self.walk_left[0]
+            self.current_img = (
+                self.walk_right[0] if self.facing == "RIGHT" else self.walk_left[0]
+            )
             self.frame_index = 0
             self.anim_timer = 0
             return
@@ -302,9 +358,18 @@ class Player:
 
         self.current_img = frames[self.frame_index]
 
-    def draw(self, screen):
-        if (self.lives > 0) and not self.dead:
-            screen.blit(self.current_img, (self.x, self.y))
+    def draw(self, screen, opponent_dead: bool = False):
+        if self.lives > 0:
+            if self.dead:
+                if self.facing == "RIGHT":
+                    death_img = pygame.transform.flip(self.death_img, True, False)
+                    screen.blit(death_img, (self.x, self.y))
+                else:
+                    screen.blit(self.death_img, (self.x, self.y))
+            elif opponent_dead:
+                screen.blit(self.victory_img, (self.x, self.y))
+            else:
+                screen.blit(self.current_img, (self.x, self.y))
 
     def draw_hearts(self, screen):
         start_y = 20
@@ -344,7 +409,7 @@ class Player:
         return not (px + pw <= x or px >= x + w or py + ph <= y or py >= y + h)
 
     def check_death(self, screen_height):
-        RESPAWN_DELAY = 1000  # 1 second
+        RESPAWN_DELAY = 2500  # 1 second
 
         now = pygame.time.get_ticks()
 
@@ -355,6 +420,8 @@ class Player:
             self.death_time = now
             self.lives -= 1
             self.health = 0
+
+            self.velocity_y -= 20
 
         if self.dead and now - self.death_time >= RESPAWN_DELAY:
             self.respawn()
