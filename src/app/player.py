@@ -58,6 +58,9 @@ class Player:
         self.death_time = 0
         self.respawn_y = 290
 
+        self.game_over = False   #n
+
+
         self.walk_right = [
             pygame.image.load(f"assets/right/movement_right_{i}.png").convert_alpha()
             for i in range(1, 13)
@@ -344,8 +347,14 @@ class Player:
             self.lives -= 1
             self.health = 0
 
+        if self.lives <= 0: #n
+            self.game_over = True
+
         if self.dead and now - self.death_time >= RESPAWN_DELAY:
             self.respawn()
+
+            
+
 
     def respawn(self):
         RESPAWN_OFFSET_Y = 60
@@ -356,3 +365,4 @@ class Player:
         self.health = 100
 
         self.dead = False
+

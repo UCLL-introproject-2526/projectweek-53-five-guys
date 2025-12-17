@@ -39,7 +39,6 @@ def startpage(screen):
     menu_bg = pygame.transform.scale(menu_bg, screen.get_size())
     menu_bg.set_alpha(200) 
 
-    
 
     
     start_img = pygame.image.load("assets/button/play.png").convert_alpha()
@@ -146,8 +145,6 @@ def startpage(screen):
         panel_right - panel_left,
         panel_bottom - panel_top
     )
-
-
 
 
 
