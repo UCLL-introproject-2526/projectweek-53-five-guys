@@ -56,7 +56,7 @@ def main():
                 PUNCH_WIDTH,
                 PUNCH_HEIGHT,
             ):
-                player2.health -= 25
+                player2.hit(player1.facing)
                 player1.punches.remove(p)
 
         for p in player2.punches:
@@ -70,7 +70,7 @@ def main():
                 PUNCH_WIDTH,
                 PUNCH_HEIGHT,
             ):
-                player1.health -= 25
+                player1.hit(player2.facing)
                 player2.punches.remove(p)
 
         player1.check_death(VIRTUAL_SIZE[1])
