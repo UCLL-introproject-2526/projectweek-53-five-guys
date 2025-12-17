@@ -274,6 +274,7 @@ class Player:
         ):
             self.velocity_y = self.jump_strength
             self.jumps_left -= 1
+            self.audio_logic("jump")
         self.jump_held = keys[self.key_up]
 
         if keys[self.key_down] and not self.is_grounded and not self.dead:
@@ -396,6 +397,7 @@ class Player:
 
     def punch(self):
         now = pygame.time.get_ticks()
+        self.audio_logic("punch")
 
         if now - self.punched_on < 300:
             return
@@ -525,6 +527,15 @@ class Player:
 
     def rects_overlap(self, px, py, pw, ph, x, y, w, h):
         return not (px + pw <= x or px >= x + w or py + ph <= y or py >= y + h)
+
+
+    def audio_logic(self, audioName):
+        try:
+            sfx = pygame.mixer.Sound(f"assets/audio/{audioName}.wav")
+            sfx.set_volume(1.0)
+            sfx.play()
+        except pygame.error:
+            pass
 
     def check_death(self, screen_height):
         RESPAWN_DELAY = 2500  # 1 second

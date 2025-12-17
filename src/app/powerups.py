@@ -76,6 +76,16 @@ class SpeedBoost(PowerUp):
         return pygame.transform.scale(image, (self.size, self.size))
 
     def apply(self, player):
+        self.audio_logic("itemReceive")
         self.state = "USED"
         self.start_time = pygame.time.get_ticks()
         player.active_powerups.append((self, pygame.time.get_ticks()))
+        player.speed += self.boost_amount
+
+    def audio_logic(self, audioName):
+        try:
+            sfx = pygame.mixer.Sound(f"assets/audio/{audioName}.wav")
+            sfx.set_volume(1.0)
+            sfx.play()
+        except pygame.error:
+            pass
