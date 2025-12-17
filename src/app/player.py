@@ -1,5 +1,6 @@
 import pygame
 import time
+import math
 
 from .powerups import SpeedBoost
 
@@ -523,6 +524,39 @@ class Player:
             0,
         )
 
+    def draw_powerups(self, screen):
+        if self.player == 1:
+            powerup_x = 60
+            invert = 1
+        else:
+            powerup_x = screen.get_width() - 50
+            invert = -1
+
+        increment = 70
+        powerup_y = 190
+
+        for i, p in enumerate(self.active_powerups):
+            rel_x_cen = powerup_x + (increment * i) * invert
+            rel_y_cen = powerup_y
+
+            ratio = pygame.time.get_ticks() - p[1]
+
+            end_angle = math.radians(self.map_value(ratio, 0, p[0].duration, 0, 360))
+            bounding_box = pygame.Rect(rel_x_cen - 30, rel_y_cen - 30, 60, 60)
+
+            pygame.draw.circle(
+                screen,
+                (255, 0, 0),
+                (rel_x_cen, rel_y_cen),
+                30,
+            )
+            screen.blit(
+                p[0].image,
+                (rel_x_cen - 25, rel_y_cen - 25),
+            )
+
+            pygame.draw.arc(screen, (34, 34, 34), bounding_box, 0, end_angle, 7)
+
     def rects_overlap(self, px, py, pw, ph, x, y, w, h):
         return not (px + pw <= x or px >= x + w or py + ph <= y or py >= y + h)
 
@@ -581,3 +615,6 @@ class Player:
 
     def is_invincible(self):
         return pygame.time.get_ticks() < self.invincible_until
+
+    def map_value(self, x, in_min, in_max, out_min, out_max):
+        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
