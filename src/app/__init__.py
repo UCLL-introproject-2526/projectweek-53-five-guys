@@ -32,7 +32,8 @@ def main():
     while running:
         clock.tick(120)
 
-        for event in pygame.event.get():
+        events = pygame.event.get()
+        for event in events:
             if event.type == pygame.QUIT:
                 running = False
 
@@ -41,8 +42,8 @@ def main():
         # for p in platforms:
         # p.draw(virtual)
 
-        player1.core_logic(platforms)
-        player2.core_logic(platforms)
+        player1.core_logic(platforms, events)
+        player2.core_logic(platforms, events)
         PUNCH_WIDTH = 70
         PUNCH_HEIGHT = 20
         for p in player1.punches:
@@ -79,8 +80,8 @@ def main():
         player1.x = max(0, min(VIRTUAL_SIZE[0] - player1.w, player1.x))
         player2.x = max(0, min(VIRTUAL_SIZE[0] - player2.w, player2.x))
 
-        player1.draw(virtual)
-        player2.draw(virtual)
+        player1.draw(virtual, opponent_dead=(player2.dead or player2.lives <= 0))
+        player2.draw(virtual, opponent_dead=(player1.dead or player1.lives <= 0))
         player1.draw_hearts(virtual)
         player1.draw_health_bar(virtual)
         player2.draw_hearts(virtual)
