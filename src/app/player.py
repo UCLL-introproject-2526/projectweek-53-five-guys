@@ -1,7 +1,6 @@
 import pygame
 import time
 import math
-
 from .powerups import SpeedBoost
 
 
@@ -54,23 +53,23 @@ class Player:
         )
 
         if player == 1:
-            self.key_left = pygame.K_LEFT
-            self.key_right = pygame.K_RIGHT
-            self.key_up = pygame.K_UP
-            self.key_down = pygame.K_DOWN
-            self.key_punch = pygame.K_m
-            self.key_dash = pygame.K_n
-            self.x = 550
-            self.respawn_x = 550
-            self.y = 400
-            self.respawn_y = 400
-        else:
             self.key_left = pygame.K_a
             self.key_right = pygame.K_d
             self.key_up = pygame.K_w
             self.key_down = pygame.K_s
             self.key_punch = pygame.K_e
             self.key_dash = pygame.K_r
+            self.x = 550
+            self.respawn_x = 550
+            self.y = 400
+            self.respawn_y = 400
+        else:
+            self.key_left = pygame.K_LEFT
+            self.key_right = pygame.K_RIGHT
+            self.key_up = pygame.K_UP
+            self.key_down = pygame.K_DOWN
+            self.key_punch = pygame.K_m
+            self.key_dash = pygame.K_n
             self.x = 1470
             self.respawn_x = 1470
             self.y = 400
