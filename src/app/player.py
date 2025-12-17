@@ -1,6 +1,7 @@
 import pygame
 import time
 
+
 PUNCH_WIDTH = 120
 PUNCH_HEIGHT = 50
 
@@ -32,13 +33,21 @@ class Player:
         self.heart_img = pygame.transform.scale(
             (pygame.image.load("assets/heart_full.png").convert_alpha()), (60, 60)
         )
+        self.death_img = pygame.transform.scale(
+            pygame.image.load(f"assets/player_{player}/death.png").convert_alpha(),
+            (self.w, self.h)
+        )
+        self.victory_img = pygame.transform.scale(
+            pygame.image.load(f"assets/player_{player}/victory.png").convert_alpha(),
+            (self.w, self.h)
+        )
 
         if player == 1:
             self.key_left = pygame.K_LEFT
             self.key_right = pygame.K_RIGHT
             self.key_up = pygame.K_UP
             self.key_down = pygame.K_DOWN
-            self.key_punch = pygame.K_MINUS
+            self.key_punch = pygame.K_m
             self.x = 550
             self.respawn_x = 550
             self.y = 400
@@ -93,12 +102,12 @@ class Player:
         self.fall_img = pygame.transform.scale(self.fall_img, (self.w, self.h))
 
         self.attack_right = [
-            pygame.image.load(f"assets/attack/attack_right_{i}.png").convert_alpha()
-            for i in range(1,5)
+            pygame.image.load(f"{base}/attack/attack_right_{i}.png").convert_alpha()
+            for i in range(1,4)
         ]
         self.attack_left = [
-            pygame.image.load(f"assets/attack/attack_left_{i}.png").convert_alpha()
-            for i in range(1,5)
+            pygame.image.load(f"{base}/attack/attack_left_{i}.png").convert_alpha()
+            for i in range(1,4)
         ]
         self.attack_right = [
             pygame.transform.scale(img, (self.w, self.h)) for img in self.attack_right
@@ -121,7 +130,7 @@ class Player:
 
         self.current_img = self.walk_right[0]
 
-    def core_logic(self, platforms):
+    def core_logic(self, platforms, events):
         keys = pygame.key.get_pressed()
 
         if self.dead or self.lives <= 0:
@@ -165,19 +174,25 @@ class Player:
                     self.x -= 10
                     break
 
-        if keys[self.key_punch]:
-            self.punch()
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == self.key_punch:
+                    self.punch()
 
-        
-        now = pygame.time.get_ticks()
-        for p in self.punches[:]:
-            if now - p[2] >= 150:
+        for p in self.punches:
+            now = pygame.time.get_ticks()
+            if now - p[2] >= 300:
                 self.punches.remove(p)
 
         if keys[self.key_up] and not self.jump_held and self.jumps_left > 0:
             self.velocity_y = self.jump_strength
             self.jumps_left -= 1
         self.jump_held = keys[self.key_up]
+
+        if keys[self.key_down] and not self.is_grounded:
+            if self.velocity_y < 0 :
+                self.velocity_y = 0
+            self.velocity_y += 3
 
         current_time = time.time()
         if keys[self.key_down] and not self.down_held:
@@ -198,6 +213,7 @@ class Player:
 
         self.velocity_y += self.gravity
         self.y += self.velocity_y
+            
 
         self.is_grounded = False
         for p in platforms:
@@ -302,9 +318,14 @@ class Player:
 
         self.current_img = frames[self.frame_index]
 
-    def draw(self, screen):
-        if (self.lives > 0) and not self.dead:
-            screen.blit(self.current_img, (self.x, self.y))
+    def draw(self, screen, opponent_dead: bool = False):
+        if self.lives > 0:
+            if self.dead:
+                screen.blit(self.death_img, (self.x, self.y))
+            elif opponent_dead:
+                screen.blit(self.victory_img, (self.x, self.y))
+            else:
+                screen.blit(self.current_img, (self.x, self.y))
 
     def draw_hearts(self, screen):
         start_y = 20
