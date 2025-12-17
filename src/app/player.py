@@ -1,6 +1,8 @@
 import pygame
 import time
 
+from app.powerups import SpeedBoost
+
 
 PUNCH_WIDTH = 120
 PUNCH_HEIGHT = 50
@@ -35,6 +37,8 @@ class Player:
         self.drop_platform = None
         self.base_speed = 10
         self.speed = self.base_speed
+
+        self.active_powerups = []
 
         self.heart_img = pygame.transform.scale(
             (pygame.image.load("assets/heart_full.png").convert_alpha()), (60, 60)
@@ -178,6 +182,19 @@ class Player:
 
         moving_left = False
         moving_right = False
+
+        self.speed = self.base_speed
+        for p in self.active_powerups:
+            picked_up_on = p[1]
+            powerup = p[0]
+            now = pygame.time.get_ticks()
+            ratio = now - picked_up_on
+            if isinstance(powerup, SpeedBoost):
+                if ratio > powerup.duration:
+                    self.active_powerups.remove(p)
+                    break
+                else:
+                    self.speed += 12
 
         if self.is_dashing and not self.dead:
             dx = self.dash_speed if self.facing == "RIGHT" else -self.dash_speed
@@ -534,6 +551,7 @@ class Player:
         self.y = self.respawn_y - RESPAWN_OFFSET_Y
 
         self.health = 100
+        self.active_powerups = []
 
         self.dead = False
 

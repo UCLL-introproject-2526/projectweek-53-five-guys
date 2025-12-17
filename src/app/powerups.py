@@ -1,44 +1,40 @@
 import pygame
 import random
+from abc import ABC, abstractmethod
 
-class SpeedBoost:
-    def __init__(self, screen_width):
-        self.size = 50
-        self.x = random.randint(50, screen_width - 50)
-        self.y = -self.size
 
-        self.fall_speed = 4
-        self.state = "FALLING"  #used for: FALLING | ON_PLATFORM | USED
+class PowerUp(ABC):
+    size = 50
+    y = -size
 
-        # timers
-        self.landed_time = 0
-        self.stay_duration = 6000
+    fall_speed = 4
+    state = "FALLING"  # used for: FALLING | ON_PLATFORM | USED
 
-        # boost settings
-        self.boost_amount = 15
-        self.duration =8000  # 8 seconds
-        self.start_time = None
+    # timers
+    landed_time = 0
+    stay_duration = 6000
 
-        # images
-        self.image = pygame.image.load("assets/items/speed_boost.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (self.size, self.size))
+    @property
+    @abstractmethod
+    def image(self):
+        pass
 
     def update(self, platforms):
         if self.state == "FALLING":
             self.y += self.fall_speed
 
             for p in platforms:
-                 if (
-                    self.x + self.size > p.x and
-                    self.x < p.x + p.w and
-                    self.y + self.size >= p.y
-            ):
-                        # land on platform
-                        self.y = p.y - self.size - 8
-                        self.state = "ON_PLATFORM"
-                        self.landed_time = pygame.time.get_ticks()
-                        break
-                 
+                if (
+                    self.x + self.size > p.x
+                    and self.x < p.x + p.w
+                    and self.y + self.size >= p.y
+                ):
+                    # land on platform
+                    self.y = p.y - self.size - 8
+                    self.state = "ON_PLATFORM"
+                    self.landed_time = pygame.time.get_ticks()
+                    break
+
         elif self.state == "ON_PLATFORM":
             now = pygame.time.get_ticks()
             if now - self.landed_time >= self.stay_duration:
@@ -53,23 +49,33 @@ class SpeedBoost:
             return
 
         hit = not (
-            player.x + player.w <= self.x or
-            player.x >= self.x + self.size or
-            player.y + player.h <= self.y or
-            player.y >= self.y + self.size
+            player.x + player.w <= self.x
+            or player.x >= self.x + self.size
+            or player.y + player.h <= self.y
+            or player.y >= self.y + self.size
         )
 
         if hit:
             self.apply(player)
 
+    @abstractmethod
+    def apply(self, player):
+        pass
+
+
+class SpeedBoost(PowerUp):
+    def __init__(self):
+        self.boost_amount = 15
+        self.duration = 8000  # 8 seconds
+        self.start_time = 0
+        self.x = random.randint(50, 1920 - 50)
+
+    @property
+    def image(self):
+        image = pygame.image.load("assets/items/speed_boost.png").convert_alpha()
+        return pygame.transform.scale(image, (self.size, self.size))
+
     def apply(self, player):
         self.state = "USED"
         self.start_time = pygame.time.get_ticks()
-        player.speed += self.boost_amount
-
-    def handle_timer(self, player):
-        if self.start_time:
-            now = pygame.time.get_ticks()
-            if now - self.start_time >= self.duration:
-                player.speed = player.base_speed
-                self.start_time= None
+        player.active_powerups.append((self, pygame.time.get_ticks()))
