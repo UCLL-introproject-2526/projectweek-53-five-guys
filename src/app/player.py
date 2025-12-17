@@ -1,7 +1,7 @@
 import pygame
 import time
 
-from app.powerups import SpeedBoost
+from .powerups import SpeedBoost
 
 
 PUNCH_WIDTH = 120
@@ -135,7 +135,11 @@ class Player:
             pygame.transform.scale(img, (self.w, self.h)) for img in self.attack_left
         ]
 
-        # Dash images (single frame per facing)
+        self.idle_img = pygame.transform.scale(
+            pygame.image.load(f"assets/player_{player}/idle.png").convert_alpha(),
+            (self.w, self.h),
+        )
+
         self.dash_right = pygame.transform.scale(
             pygame.image.load(
                 f"assets/player_{player}/dash/dash_right.png"
@@ -171,7 +175,7 @@ class Player:
         self.dash_frame = 0
         self.dash_anim_speed = 4
 
-        self.current_img = self.walk_right[0]
+        self.current_img = self.idle_img
 
     def core_logic(self, platforms, events):
         keys = pygame.key.get_pressed()
@@ -437,11 +441,7 @@ class Player:
                     self.is_attacking = False
                     self.attack_frame = 0
 
-                    self.current_img = (
-                        self.walk_left[0]
-                        if self.facing == "LEFT"
-                        else self.walk_right[0]
-                    )
+                    self.current_img = self.idle_img
                 else:
                     self.current_img = frames[self.attack_frame]
             return
@@ -464,9 +464,7 @@ class Player:
         elif moving_right:
             frames = self.walk_right
         else:
-            self.current_img = (
-                self.walk_right[0] if self.facing == "RIGHT" else self.walk_left[0]
-            )
+            self.current_img = self.idle_img
             self.frame_index = 0
             self.anim_timer = 0
             return
@@ -527,7 +525,6 @@ class Player:
 
     def rects_overlap(self, px, py, pw, ph, x, y, w, h):
         return not (px + pw <= x or px >= x + w or py + ph <= y or py >= y + h)
-
 
     def audio_logic(self, audioName):
         try:
