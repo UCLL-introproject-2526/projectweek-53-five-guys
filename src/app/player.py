@@ -38,7 +38,7 @@ class Player:
         )
         self.death_img = pygame.transform.scale(
             pygame.image.load(f"assets/player_{player}/death.png").convert_alpha(),
-            (self.w, self.h),
+            (self.w * 0.70, self.h * 0.83),
         )
         self.victory_img = pygame.transform.scale(
             pygame.image.load(f"assets/player_{player}/victory.png").convert_alpha(),
