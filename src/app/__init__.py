@@ -77,7 +77,7 @@ def main():
                         player1.katana_images = None
                 else:
                     dmg = 25
-                player2.hit(player1.facing, damage=dmg)
+                player2.hit(player1.facing, damage=dmg, is_katana=is_katana)
                 player1.punches.remove(p)
 
         for p in player2.punches[:]:
@@ -94,7 +94,7 @@ def main():
                         player2.katana_images = None
                 else:
                     dmg = 25
-                player1.hit(player2.facing, damage=dmg)
+                player1.hit(player2.facing, damage=dmg, is_katana=is_katana)
                 player2.punches.remove(p)
 
         player1.check_death(VIRTUAL_SIZE[1])
@@ -105,6 +105,10 @@ def main():
 
         player1.draw(virtual, opponent_dead=(player2.dead or player2.lives <= 0))
         player2.draw(virtual, opponent_dead=(player1.dead or player1.lives <= 0))
+        
+        player1.draw_blood(virtual)
+        player2.draw_blood(virtual)
+        
         player1.draw_hearts(virtual)
         player1.draw_health_bar(virtual)
         player2.draw_hearts(virtual)

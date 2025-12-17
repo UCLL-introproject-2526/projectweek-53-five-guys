@@ -1,5 +1,6 @@
 import pygame
 import time
+import random
 
 from .powerups import SpeedBoost
 
@@ -138,7 +139,7 @@ class Player:
             pygame.transform.scale(img, (self.w, self.h)) for img in self.attack_left
         ]
 
-        # Katana attack animations
+        
         self.katana_attack_right = [
             pygame.image.load(f"assets/player_{player}/katana/katana_right_{i}.png").convert_alpha()
             for i in range(1, 4)
@@ -191,6 +192,11 @@ class Player:
         self.dash_anim_speed = 4
 
         self.current_img = self.walk_right[0]
+
+        
+        self.blood_img = pygame.image.load("assets/blood.png").convert_alpha()
+        self.blood_img = pygame.transform.scale(self.blood_img, (80, 80))
+        self.blood_splashes = []  
 
     def core_logic(self, platforms, events):
         keys = pygame.key.get_pressed()
@@ -407,11 +413,21 @@ class Player:
 
         self.update_animation(moving_left, moving_right)
 
-    def hit(self, hit_from, damage=25):
+    def hit(self, hit_from, damage=25, is_katana=False):
         self.hit_on = pygame.time.get_ticks()
         self.hit_from = hit_from
         self.got_hit = True
         self.health -= damage
+
+        
+        if is_katana:
+            num_splashes = random.randint(3, 5)
+            for _ in range(num_splashes):
+                splash_x = self.x + random.randint(int(0.1 * self.w), int(0.9 * self.w))
+                splash_y = self.y + random.randint(int(0.1 * self.h), int(0.9 * self.h))
+                rotation = random.randint(0, 360)
+                scale = random.uniform(0.7, 1.3)
+                self.blood_splashes.append((splash_x, splash_y, pygame.time.get_ticks(), rotation, scale))
 
     def punch(self):
         now = pygame.time.get_ticks()
@@ -534,6 +550,30 @@ class Player:
                     offset = right_off if self.facing == "RIGHT" else left_off
                     screen.blit(katana_img, offset)
 
+                
+                now = pygame.time.get_ticks()
+                for splash in self.blood_splashes[:]:
+                    age = now - splash[2]
+                    if age > 800:
+                        self.blood_splashes.remove(splash)
+                    else:
+                        
+                        alpha = int(255 * max(0, 1 - (age / 800) ** 0.6))
+                        rotation = splash[3]
+                        scale = splash[4]
+                        
+                        blood_scaled = pygame.transform.scale(
+                            self.blood_img, 
+                            (int(80 * scale), int(80 * scale))
+                        )
+                        blood_rotated = pygame.transform.rotate(blood_scaled, rotation)
+                        blood_copy = blood_rotated.copy()
+                        blood_copy.set_alpha(alpha)
+                        
+                        # Center the splash
+                        rect = blood_copy.get_rect(center=(splash[0], splash[1]))
+                        screen.blit(blood_copy, rect)
+
     def draw_hearts(self, screen):
         start_y = 20
         heart_spacing = 50
@@ -584,6 +624,14 @@ class Player:
             self.lives -= 1
             self.health = 0
 
+            num_splashes = random.randint(15, 25)
+            for _ in range(num_splashes):
+                splash_x = self.x + random.randint(int(-0.2 * self.w), int(1.2 * self.w))
+                splash_y = self.y + random.randint(int(-0.2 * self.h), int(1.2 * self.h))
+                rotation = random.randint(0, 360)
+                scale = random.uniform(1.0, 2.0)
+                self.blood_splashes.append((splash_x, splash_y, pygame.time.get_ticks(), rotation, scale))
+
             self.velocity_y -= 20
 
         if self.dead and now - self.death_time >= RESPAWN_DELAY:
@@ -626,3 +674,25 @@ class Player:
         self.has_katana = True
         self.katana_images = images_dict
         self.katana_hits_left = 3
+
+    def draw_blood(self, screen):
+        now = pygame.time.get_ticks()
+        for splash in self.blood_splashes[:]:
+            age = now - splash[2]
+            if age > 800:
+                self.blood_splashes.remove(splash)
+            else:
+                alpha = int(255 * max(0, 1 - (age / 800) ** 0.6))
+                rotation = splash[3]
+                scale = splash[4]
+                
+                blood_scaled = pygame.transform.scale(
+                    self.blood_img, 
+                    (int(80 * scale), int(80 * scale))
+                )
+                blood_rotated = pygame.transform.rotate(blood_scaled, rotation)
+                blood_copy = blood_rotated.copy()
+                blood_copy.set_alpha(alpha)
+                
+                rect = blood_copy.get_rect(center=(splash[0], splash[1]))
+                screen.blit(blood_copy, rect)
