@@ -23,6 +23,9 @@ class PowerUp(ABC):
         if self.state == "FALLING":
             self.y += self.fall_speed
 
+            if self.y >= 1080:
+                self.state = "USED"
+
             for p in platforms:
                 if (
                     self.x + self.size > p.x
@@ -38,7 +41,7 @@ class PowerUp(ABC):
         elif self.state == "ON_PLATFORM":
             now = pygame.time.get_ticks()
             if now - self.landed_time >= self.stay_duration:
-                self.state = "USED"  # despawn
+                self.state = "USED"
 
     def draw(self, screen):
         if self.state != "USED":
@@ -104,3 +107,28 @@ class Heart(PowerUp):
     def apply(self, player):
         self.state = "USED"
         player.lives += self.heal_amount
+
+
+class Katana(PowerUp):
+    def __init__(self):
+        self.x = random.randint(50, 1920 - 50)
+        self.durability = 3
+        self.max_durability = 3
+        self.images = {
+            "left": pygame.transform.scale(
+                pygame.image.load("assets/items/katana_left.png").convert_alpha(),
+                (self.size, self.size),
+            ),
+            "right": pygame.transform.scale(
+                pygame.image.load("assets/items/katana_right.png").convert_alpha(),
+                (self.size, self.size),
+            ),
+        }
+
+    @property
+    def image(self):
+        return self.images["right"]
+
+    def apply(self, player):
+        self.state = "USED"
+        player.equiped_weapon = self

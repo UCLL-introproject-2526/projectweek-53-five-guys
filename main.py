@@ -5,7 +5,7 @@ from platforms import Platform
 from player import Player
 from menu import startpage
 from menu import screen_to_virtual
-from powerups import SpeedBoost, Heart
+from powerups import SpeedBoost, Heart, Katana
 
 
 VIRTUAL_SIZE = (1920, 1080)
@@ -34,15 +34,18 @@ async def main():
     name_font = pygame.font.Font("assets/font/Kaijuz.ttf", 36)
     p1_name_surf = name_font.render(player1_name, True, (255, 255, 255))
     p2_name_surf = name_font.render(player2_name, True, (255, 255, 255))
+
     speed_boost = None
     BOOST_EVENT = pygame.USEREVENT + 1
     pygame.time.set_timer(BOOST_EVENT, 13000)  # spawn every 13 seconds
 
     heart = None
     HEART_EVENT = pygame.USEREVENT + 2
-    pygame.time.set_timer(
-        HEART_EVENT, 20000
-    )  # spawn every 20 seconds (adjust as you like)
+    pygame.time.set_timer(HEART_EVENT, 20000)
+
+    katana = None
+    KATANA_EVENT = pygame.USEREVENT + 3
+    pygame.time.set_timer(KATANA_EVENT, 20000)
 
     platforms = [
         Platform(280, 420, 470, 73, True),
@@ -67,6 +70,8 @@ async def main():
             if event.type == HEART_EVENT and heart is None:
                 if random.random() <= 0.3:
                     heart = Heart()
+            if event.type == KATANA_EVENT and katana is None:
+                katana = Katana()
 
         virtual.blit((background), (0, 0))
 
@@ -88,7 +93,7 @@ async def main():
                 PUNCH_WIDTH,
                 PUNCH_HEIGHT,
             ):
-                player2.hit(player1.facing)
+                player2.hit(player1.facing, p[3])
                 player1.punches.remove(p)
 
         for p in player2.punches:
@@ -102,7 +107,7 @@ async def main():
                 PUNCH_WIDTH,
                 PUNCH_HEIGHT,
             ):
-                player1.hit(player2.facing)
+                player1.hit(player2.facing, p[3])
                 player2.punches.remove(p)
 
         player1.check_death(VIRTUAL_SIZE[1])
@@ -120,27 +125,15 @@ async def main():
         player2.draw_health_bar(virtual)
         player2.draw_powerups(virtual)
 
-        if speed_boost:
-            speed_boost.update(platforms)
-            speed_boost.draw(virtual)
+        if katana:
+            katana.update(platforms)
+            katana.draw(virtual)
 
-            speed_boost.check_collision(player1)
-            speed_boost.check_collision(player2)
+            katana.check_collision(player1)
+            katana.check_collision(player2)
 
-        # Fell off screen without being collected
-        if speed_boost and speed_boost.state == "USED":
-            speed_boost = None
-
-        virtual.blit(p1_name_surf, (40, 104))
-        virtual.blit(p2_name_surf, (VIRTUAL_SIZE[0] - 320, 104))
-
-        mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), screen)
-        mouse_click = pygame.mouse.get_pressed()[0]
-
-        virtual.blit(game_quit_img, game_quit_rect)
-
-        if game_quit_rect.collidepoint(mouse_pos) and mouse_click:
-            running = False
+            if katana.state == "USED":
+                katana = None
 
         if heart:
             heart.update(platforms)  # falls down / lands on platforms
@@ -152,6 +145,28 @@ async def main():
             # Remove heart if collected or expired
             if heart.state == "USED":
                 heart = None
+
+        if speed_boost:
+            speed_boost.update(platforms)
+            speed_boost.draw(virtual)
+
+            speed_boost.check_collision(player1)
+            speed_boost.check_collision(player2)
+
+            # Fell off screen without being collected
+            if speed_boost.state == "USED":
+                speed_boost = None
+
+        virtual.blit(p1_name_surf, (40, 104))
+        virtual.blit(p2_name_surf, (VIRTUAL_SIZE[0] - 320, 104))
+
+        mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), screen)
+        mouse_click = pygame.mouse.get_pressed()[0]
+
+        virtual.blit(game_quit_img, game_quit_rect)
+
+        if game_quit_rect.collidepoint(mouse_pos) and mouse_click:
+            running = False
 
         blit_scaled(screen, virtual)
         pygame.display.flip()

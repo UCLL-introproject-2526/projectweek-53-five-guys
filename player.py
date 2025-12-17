@@ -1,7 +1,7 @@
 import pygame
 import time
 import math
-from powerups import SpeedBoost
+from powerups import Katana, SpeedBoost
 
 
 PUNCH_WIDTH = 120
@@ -39,6 +39,7 @@ class Player:
         self.speed = self.base_speed
 
         self.active_powerups = []
+        self.equiped_weapon = None
 
         self.heart_img = pygame.transform.scale(
             (pygame.image.load("assets/heart_full.png").convert_alpha()), (60, 60)
@@ -153,6 +154,27 @@ class Player:
             (self.w, self.h),
         )
 
+        self.katana_attack_right = [
+            pygame.image.load(
+                f"assets/player_{player}/katana/katana_right_{i}.png"
+            ).convert_alpha()
+            for i in range(1, 4)
+        ]
+        self.katana_attack_left = [
+            pygame.image.load(
+                f"assets/player_{player}/katana/katana_left_{i}.png"
+            ).convert_alpha()
+            for i in range(1, 4)
+        ]
+        self.katana_attack_right = [
+            pygame.transform.scale(img, (self.w, self.h))
+            for img in self.katana_attack_right
+        ]
+        self.katana_attack_left = [
+            pygame.transform.scale(img, (self.w, self.h))
+            for img in self.katana_attack_left
+        ]
+
         self.facing = "RIGHT"
         self.frame_index = 0
         self.anim_timer = 0
@@ -186,6 +208,9 @@ class Player:
 
         moving_left = False
         moving_right = False
+
+        if not self.equiped_weapon == None and self.equiped_weapon.durability <= 0:
+            self.equiped_weapon = None
 
         self.speed = self.base_speed
         for p in self.active_powerups:
@@ -393,11 +418,14 @@ class Player:
 
         self.update_animation(moving_left, moving_right)
 
-    def hit(self, hit_from):
+    def hit(self, hit_from, weapon):
         self.hit_on = pygame.time.get_ticks()
         self.hit_from = hit_from
         self.got_hit = True
-        self.health -= 25
+        if isinstance(weapon, Katana):
+            self.health -= 50
+        else:
+            self.health -= 25
 
     def punch(self):
         now = pygame.time.get_ticks()
@@ -408,6 +436,26 @@ class Player:
         if self.is_dashing:
             return
 
+        if isinstance(self.equiped_weapon, Katana):
+            if self.equiped_weapon.durability <= 0:
+                self.equiped_weapon = None
+                self.current_img = (
+                    self.attack_left[0]
+                    if self.facing == "LEFT"
+                    else self.attack_right[0]
+                )
+            else:
+                self.equiped_weapon.durability -= 1
+                self.current_img = (
+                    self.katana_attack_left[0]
+                    if self.facing == "LEFT"
+                    else self.katana_attack_right[0]
+                )
+        else:
+            self.current_img = (
+                self.attack_left[0] if self.facing == "LEFT" else self.attack_right[0]
+            )
+
         self.is_attacking = True
         self.attack_frame = 0
         self.anim_timer = 0
@@ -417,9 +465,19 @@ class Player:
         )
 
         if self.facing == "LEFT":
-            punch_meta = (self.x - PUNCH_WIDTH, self.y + int(0.3 * self.h), now)
+            punch_meta = (
+                self.x - PUNCH_WIDTH,
+                self.y + int(0.3 * self.h),
+                now,
+                self.equiped_weapon,
+            )
         else:
-            punch_meta = (self.x + self.w, self.y + int(0.3 * self.h), now)
+            punch_meta = (
+                self.x + self.w,
+                self.y + int(0.3 * self.h),
+                now,
+                self.equiped_weapon,
+            )
 
         self.punched_on = now
         self.punches.append(punch_meta)
@@ -432,7 +490,17 @@ class Player:
             return
 
         if self.is_attacking:
-            frames = self.attack_left if self.facing == "LEFT" else self.attack_right
+            if isinstance(self.equiped_weapon, Katana):
+                frames = (
+                    self.katana_attack_left
+                    if self.facing == "LEFT"
+                    else self.katana_attack_right
+                )
+            else:
+                frames = (
+                    self.attack_left if self.facing == "LEFT" else self.attack_right
+                )
+
             now = pygame.time.get_ticks()
             if now - self.last_attack_frame_at >= self.attack_frame_duration_ms:
                 self.last_attack_frame_at = now
@@ -488,6 +556,34 @@ class Player:
                 screen.blit(self.victory_img, (self.x, self.y))
             else:
                 screen.blit(self.current_img, (self.x, self.y))
+
+                if isinstance(self.equiped_weapon, Katana) and not self.is_attacking:
+                    if self.player == 1:
+                        right_off = (
+                            self.x + int(0.58 * self.w),
+                            self.y + int(0.18 * self.h),
+                        )
+                        left_off = (
+                            self.x + int(-0.06 * self.w),
+                            self.y + int(0.18 * self.h),
+                        )
+                    else:
+                        right_off = (
+                            self.x + int(0.60 * self.w) + 15,
+                            self.y + int(0.22 * self.h),
+                        )
+                        left_off = (
+                            self.x + int(-0.10 * self.w) - 15,
+                            self.y + int(0.22 * self.h),
+                        )
+
+                    katana_img = (
+                        self.equiped_weapon.images["right"]
+                        if self.facing == "RIGHT"
+                        else self.equiped_weapon.images["left"]
+                    )
+                    offset = right_off if self.facing == "RIGHT" else left_off
+                    screen.blit(katana_img, offset)
 
     def draw_hearts(self, screen):
         start_y = 20
@@ -556,6 +652,35 @@ class Player:
 
             pygame.draw.arc(screen, (34, 34, 34), bounding_box, 0, end_angle, 7)
 
+        if not self.equiped_weapon == None:
+            rel_x_cen = powerup_x + (increment * len(self.active_powerups)) * invert
+            rel_y_cen = powerup_y
+
+            end_angle = math.radians(
+                self.map_value(
+                    self.equiped_weapon.durability,
+                    0,
+                    self.equiped_weapon.max_durability,
+                    0,
+                    360,
+                )
+            )
+            bounding_box = pygame.Rect(rel_x_cen - 30, rel_y_cen - 30, 60, 60)
+
+            pygame.draw.circle(
+                screen,
+                (255, 0, 0),
+                (rel_x_cen, rel_y_cen),
+                30,
+            )
+
+            pygame.draw.arc(screen, (34, 34, 34), bounding_box, 0, end_angle, 7)
+
+            screen.blit(
+                self.equiped_weapon.image,
+                (rel_x_cen - 25, rel_y_cen - 25),
+            )
+
     def rects_overlap(self, px, py, pw, ph, x, y, w, h):
         return not (px + pw <= x or px >= x + w or py + ph <= y or py >= y + h)
 
@@ -593,6 +718,7 @@ class Player:
 
         self.health = 100
         self.active_powerups = []
+        self.equiped_weapon = None
 
         self.dead = False
 
