@@ -13,7 +13,6 @@ clock = pygame.time.Clock()
 def startpage(screen, real):
     clock.tick(120)
     screen_w, screen_h = (1920, 1080)
-    right_x = int(screen_w * 0.75)
 
     name1 = "Player 1"
     name2 = "Player 2"
@@ -21,28 +20,19 @@ def startpage(screen, real):
 
     input_font = pygame.font.Font("assets/font/Kaijuz.ttf", 24)
 
-    title_img = pygame.image.load("assets/logo.png").convert_alpha()
-    title_img = pygame.transform.scale(title_img, (700, 380))
-
+    # background only (logo removed)
     menu_bg = pygame.image.load("assets/background.png").convert_alpha()
     menu_bg = pygame.transform.scale(menu_bg, screen.get_size())
     menu_bg.set_alpha(200)
 
-    start_img = pygame.image.load("assets/button/play.png").convert_alpha()
-    quit_img = pygame.image.load("assets/button/quit.png").convert_alpha()
+    start_img = pygame.image.load("assets/button/start_game_logo.png").convert_alpha()
+    quit_img = pygame.image.load("assets/button/quit_game_logo.png").convert_alpha()
 
     start_img = pygame.transform.scale(start_img, (360, 75))
     quit_img = pygame.transform.scale(quit_img, (360, 75))
 
-    start_rect = start_img.get_rect(topleft=(1400, 400))
-    quit_rect = quit_img.get_rect(topleft=(1400, 520))
-
-    base_y = screen_h // 2 + 40
-    gap = 120
-
-    start_rect = start_img.get_rect(center=(right_x, base_y))
-    quit_rect = quit_img.get_rect(center=(right_x, base_y + gap))
-
+    # ============================================================
+    # CHARACTER CHOOSER (center-ish)
     char1_img = pygame.image.load(
         "assets/character/player_1_poster_choosing.png"
     ).convert_alpha()
@@ -53,20 +43,20 @@ def startpage(screen, real):
     char1_img = pygame.transform.scale(char1_img, (240, 340))
     char2_img = pygame.transform.scale(char2_img, (240, 340))
 
-    left_center_x = screen_w * 0.25
-    char_center_y = screen_h * 0.52
-    char_gap = 40
+    choose_center_x = screen_w * 0.50
+    choose_center_y = screen_h * 0.62
+    char_gap = 60
 
     char1_rect = char1_img.get_rect(
         center=(
-            left_center_x - char1_img.get_width() // 2 - char_gap // 2,
-            char_center_y,
+            choose_center_x - char1_img.get_width() // 2 - char_gap // 2,
+            choose_center_y,
         )
     )
     char2_rect = char2_img.get_rect(
         center=(
-            left_center_x + char2_img.get_width() // 2 + char_gap // 2,
-            char_center_y,
+            choose_center_x + char2_img.get_width() // 2 + char_gap // 2,
+            choose_center_y,
         )
     )
 
@@ -80,53 +70,26 @@ def startpage(screen, real):
         box_width,
         box_height,
     )
-
     box2_rect = pygame.Rect(
         char2_rect.centerx - box_width // 2,
         char2_rect.bottom + box_gap,
         box_width,
         box_height,
     )
+    # ============================================================
 
-    left_center_x = screen_w * 0.25
-    char_center_y = screen_h * 0.52
-    char_gap = 40
+    # ============================================================
+    # START + QUIT (placed ABOVE the chooser)
+    buttons_center_x = choose_center_x
+    buttons_y = char1_rect.top - 220  # position above characters
+    gap = 110
 
-    char1_rect = char1_img.get_rect(
-        center=(
-            left_center_x - char1_img.get_width() // 2 - char_gap // 2,
-            char_center_y,
-        )
-    )
-
-    char2_rect = char2_img.get_rect(
-        center=(
-            left_center_x + char2_img.get_width() // 2 + char_gap // 2,
-            char_center_y,
-        )
-    )
-
-    title_font = pygame.font.Font("assets/font/Attack_Of_Monster.ttf", 36)
-
-    title_text = title_font.render("CHOOSE YOUR CHARACTER", True, (255, 255, 255))
-
-    title_rect = title_text.get_rect(center=(screen_w * 0.25, screen_h * 0.25))
-
-    panel_padding = 25
-
-    panel_left = char1_rect.left - panel_padding
-    panel_top = title_rect.top - panel_padding
-    panel_right = char2_rect.right + panel_padding
-    panel_bottom = box1_rect.bottom + panel_padding
-
-    panel_rect = pygame.Rect(
-        panel_left, panel_top, panel_right - panel_left, panel_bottom - panel_top
-    )
+    start_rect = start_img.get_rect(center=(buttons_center_x, buttons_y))
+    quit_rect = quit_img.get_rect(center=(buttons_center_x, buttons_y + gap))
+    # ============================================================
 
     error_message = ""
     error_font = pygame.font.Font("assets/font/Kaijuz.ttf", 24)
-
-    title_img_rect = title_img.get_rect(center=(right_x, 200))
 
     while True:
         for event in pygame.event.get():
@@ -149,7 +112,6 @@ def startpage(screen, real):
                         name1 = name1[:-1]
                     else:
                         name1 += event.unicode
-
                 elif active_box == 2:
                     if event.key == pygame.K_BACKSPACE:
                         name2 = name2[:-1]
@@ -157,30 +119,16 @@ def startpage(screen, real):
                         name2 += event.unicode
 
         screen.fill((0, 0, 0))
-
         screen.blit(menu_bg, (0, 0))
 
         fade = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         fade.fill((0, 0, 0, 150))
         screen.blit(fade, (0, 0))
 
-        pygame.draw.rect(screen, (255, 255, 255), box1_rect, 2)
-        pygame.draw.rect(screen, (255, 255, 255), box2_rect, 2)
-
-        if active_box == 1:
-            pygame.draw.rect(screen, (0, 150, 255), box1_rect, 2)
-        if active_box == 2:
-            pygame.draw.rect(screen, (0, 150, 255), box2_rect, 2)
-
-        name1_surf = input_font.render(name1, True, (255, 255, 255))
-        name2_surf = input_font.render(name2, True, (255, 255, 255))
-
-        screen.blit(name1_surf, (box1_rect.x + 8, box1_rect.y + 6))
-        screen.blit(name2_surf, (box2_rect.x + 8, box2_rect.y + 6))
-
         mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), real)
         mouse_click = pygame.mouse.get_pressed()[0]
 
+        # ---------------- START + QUIT (above chooser) ----------------
         if start_rect.collidepoint(mouse_pos):
             hover_img = pygame.transform.scale(
                 start_img, (int(start_rect.width * 1.1), int(start_rect.height * 1.1))
@@ -196,19 +144,11 @@ def startpage(screen, real):
         else:
             screen.blit(start_img, start_rect)
 
-        # panel_surface = pygame.Surface(panel_rect.size, pygame.SRCALPHA)
-        # panel_surface.fill((20, 20, 20, 180))
-        # screen.blit(panel_surface, panel_rect.topleft)
-
-        screen.blit(title_img, title_img_rect)
-
         if quit_rect.collidepoint(mouse_pos):
             hover_img = pygame.transform.scale(
                 quit_img, (int(quit_rect.width * 1.1), int(quit_rect.height * 1.1))
             )
-
             hover_rect = hover_img.get_rect(center=quit_rect.center)
-
             screen.blit(hover_img, hover_rect)
 
             if mouse_click:
@@ -217,34 +157,28 @@ def startpage(screen, real):
         else:
             screen.blit(quit_img, quit_rect)
 
-        panel_surface = pygame.Surface(panel_rect.size, pygame.SRCALPHA)
+        # ---------------- CHARACTER CHOOSER ----------------
+        screen.blit(char1_img, char1_rect)
+        screen.blit(char2_img, char2_rect)
 
-        pygame.draw.rect(
-            panel_surface, (15, 15, 15, 220), panel_surface.get_rect(), border_radius=60
-        )
+        pygame.draw.rect(screen, (255, 255, 255), box1_rect, 2)
+        pygame.draw.rect(screen, (255, 255, 255), box2_rect, 2)
 
-        border_surface = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+        if active_box == 1:
+            pygame.draw.rect(screen, (0, 150, 255), box1_rect, 2)
+        if active_box == 2:
+            pygame.draw.rect(screen, (0, 150, 255), box2_rect, 2)
 
-        pygame.draw.rect(
-            border_surface, (255, 255, 255, 200), border_surface.get_rect(), 20
-        )
+        name1_surf = input_font.render(name1, True, (255, 255, 255))
+        name2_surf = input_font.render(name2, True, (255, 255, 255))
 
-        pygame.draw.rect(screen, (255, 255, 255, 120), panel_rect, 2, border_radius=30)
-
-        screen.blit(border_surface, (0, 0))
+        screen.blit(name1_surf, (box1_rect.x + 8, box1_rect.y + 6))
+        screen.blit(name2_surf, (box2_rect.x + 8, box2_rect.y + 6))
 
         if error_message != "":
             error_surf = error_font.render(error_message, True, (255, 80, 80))
-            error_rect = error_surf.get_rect(center=(screen_w // 2, screen_h * 0.85))
-
+            error_rect = error_surf.get_rect(center=(screen_w // 2, screen_h * 0.5))
             screen.blit(error_surf, error_rect)
-
-        screen.blit(panel_surface, panel_rect.topleft)
-
-        screen.blit(title_text, title_rect)
-
-        screen.blit(char1_img, char1_rect)
-        screen.blit(char2_img, char2_rect)
 
         blit_scaled(real, screen)
         pygame.display.flip()
