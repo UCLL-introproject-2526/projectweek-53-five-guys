@@ -6,10 +6,14 @@ VIRTUAL_SIZE = (1920, 1080)
 
 
 def main():
+    pygame.mixer.init()
     pygame.init()
 
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     virtual = pygame.Surface(VIRTUAL_SIZE)
+
+    test_sfx = pygame.mixer.Sound("assets/audio/test_audio.wav")
+    test_sfx.set_volume(1.0)
 
     clock = pygame.time.Clock()
 
