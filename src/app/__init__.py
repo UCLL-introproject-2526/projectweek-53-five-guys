@@ -42,7 +42,7 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == BOOST_EVENT and speed_boost is None:
-                speed_boost = SpeedBoost(VIRTUAL_SIZE[0])
+                speed_boost = SpeedBoost()
 
         virtual.blit((background), (0, 0))
 
@@ -101,9 +101,6 @@ def main():
 
             speed_boost.check_collision(player1)
             speed_boost.check_collision(player2)
-
-            speed_boost.handle_timer(player1)
-            speed_boost.handle_timer(player2)
 
         # Fell off screen without being collected
         if speed_boost and speed_boost.state == "USED":
