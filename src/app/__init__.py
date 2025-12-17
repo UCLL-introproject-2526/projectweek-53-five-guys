@@ -2,6 +2,8 @@ import pygame
 from .platforms import Platform
 from .player import Player
 from .powerups import SpeedBoost
+from .menu import startpage
+from .menu import screen_to_virtual
 
 VIRTUAL_SIZE = (1920, 1080)
 
@@ -11,18 +13,26 @@ def main():
 
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     virtual = pygame.Surface(VIRTUAL_SIZE)
-
     clock = pygame.time.Clock()
+
+    player1_name, player2_name = startpage(virtual, screen)
 
     player1 = Player(1)
     player2 = Player(2)
 
+    background = pygame.image.load("assets/background.png").convert()
+    background = pygame.transform.scale(background, (VIRTUAL_SIZE[0], VIRTUAL_SIZE[1]))
+
+    game_quit_img = pygame.image.load("assets/button/quit2.png").convert_alpha()
+    game_quit_img = pygame.transform.scale(game_quit_img, (220, 70))
+    game_quit_rect = game_quit_img.get_rect(bottomleft=(30, VIRTUAL_SIZE[1] - 30))
+
+    name_font = pygame.font.Font("assets/font/Kaijuz.ttf", 36)
+    p1_name_surf = name_font.render(player1_name, True, (255, 255, 255))
+    p2_name_surf = name_font.render(player2_name, True, (255, 255, 255))
     speed_boost = None
     BOOST_EVENT = pygame.USEREVENT + 1
     pygame.time.set_timer(BOOST_EVENT, 13000)  # spawn every 13 seconds
-
-    background = pygame.image.load("assets/background.png").convert()
-    background = pygame.transform.scale(background, (VIRTUAL_SIZE[0], VIRTUAL_SIZE[1]))
 
     platforms = [
         Platform(280, 420, 470, 73, True),
@@ -35,7 +45,8 @@ def main():
 
     running = True
     while running:
-        clock.tick(120)
+        clock.tick(60)
+        virtual.blit((background), (0, 0))
 
         events = pygame.event.get()
         for event in events:
@@ -43,11 +54,6 @@ def main():
                 running = False
             if event.type == BOOST_EVENT and speed_boost is None:
                 speed_boost = SpeedBoost()
-
-        virtual.blit((background), (0, 0))
-
-        # for p in platforms:
-        # p.draw(virtual)
 
         player1.core_logic(platforms, events)
         player2.core_logic(platforms, events)
@@ -106,9 +112,19 @@ def main():
         if speed_boost and speed_boost.state == "USED":
             speed_boost = None
 
+        virtual.blit(p1_name_surf, (40, 104))
+        virtual.blit(p2_name_surf, (VIRTUAL_SIZE[0] - 320, 104))
+
+        mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), screen)
+        mouse_click = pygame.mouse.get_pressed()[0]
+
+        virtual.blit(game_quit_img, game_quit_rect)
+
+        if game_quit_rect.collidepoint(mouse_pos) and mouse_click:
+            running = False
+
         blit_scaled(screen, virtual)
         pygame.display.flip()
-        clock.tick(60)
 
 
 def blit_scaled(screen, virtual):
