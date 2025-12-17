@@ -1,46 +1,43 @@
 import pygame
+import random
 from .platforms import Platform
 from .player import Player
 from .menu import startpage
 from .menu import screen_to_virtual
 from .powerups import SpeedBoost, Heart
 
-
 VIRTUAL_SIZE = (1920, 1080)
 
-
 def main():
-    # pygame.mixer.init()
     pygame.init()
 
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     virtual = pygame.Surface(VIRTUAL_SIZE)
     clock = pygame.time.Clock()
 
-    player1_name, player2_name = startpage(virtual, screen)
+    player1_name, player2_name, chosen_bg = startpage(virtual, screen)
 
     player1 = Player(1)
     player2 = Player(2)
 
-    background = pygame.image.load("assets/background.png").convert()
+    background = pygame.image.load(chosen_bg).convert()
     background = pygame.transform.scale(background, (VIRTUAL_SIZE[0], VIRTUAL_SIZE[1]))
 
-    game_quit_img = pygame.image.load("assets/button/quit2.png").convert_alpha()
+    game_quit_img = pygame.image.load("assets/button/quit_game.png").convert_alpha()
     game_quit_img = pygame.transform.scale(game_quit_img, (220, 70))
     game_quit_rect = game_quit_img.get_rect(bottomleft=(30, VIRTUAL_SIZE[1] - 30))
 
-    name_font = pygame.font.Font("assets/font/Kaijuz.ttf", 36)
+    name_font = pygame.font.Font("assets/font/PressStart2P-Regular.ttf", 36)
     p1_name_surf = name_font.render(player1_name, True, (255, 255, 255))
     p2_name_surf = name_font.render(player2_name, True, (255, 255, 255))
+    
     speed_boost = None
     BOOST_EVENT = pygame.USEREVENT + 1
-    pygame.time.set_timer(BOOST_EVENT, 13000)  # spawn every 13 seconds
+    pygame.time.set_timer(BOOST_EVENT, 13000)
 
     heart = None
     HEART_EVENT = pygame.USEREVENT + 2
-    pygame.time.set_timer(
-        HEART_EVENT, 20000
-    )  # spawn every 20 seconds (adjust as you like)
+    pygame.time.set_timer(HEART_EVENT, 20000)
 
     platforms = [
         Platform(280, 420, 470, 73, True),
@@ -66,40 +63,19 @@ def main():
                 if random.random() <= 0.3:
                     heart = Heart()
 
-        virtual.blit((background), (0, 0))
-
-        # for p in platforms:
-        # p.draw(virtual)
-
         player1.core_logic(platforms, events)
         player2.core_logic(platforms, events)
-        PUNCH_WIDTH = 70
-        PUNCH_HEIGHT = 20
-        for p in player1.punches:
-            if player1.rects_overlap(
-                player2.x,
-                player2.y,
-                player2.w,
-                player2.h,
-                p[0],
-                p[1],
-                PUNCH_WIDTH,
-                PUNCH_HEIGHT,
-            ):
+        PUNCH_WIDTH, PUNCH_HEIGHT = 70, 20
+        
+        # P1 hits P2
+        for p in player1.punches[:]:
+            if player1.rects_overlap(player2.x, player2.y, player2.w, player2.h, p[0], p[1], PUNCH_WIDTH, PUNCH_HEIGHT):
                 player2.hit(player1.facing)
                 player1.punches.remove(p)
 
-        for p in player2.punches:
-            if player2.rects_overlap(
-                player1.x,
-                player1.y,
-                player1.w,
-                player1.h,
-                p[0],
-                p[1],
-                PUNCH_WIDTH,
-                PUNCH_HEIGHT,
-            ):
+        # P2 hits P1
+        for p in player2.punches[:]:
+            if player2.rects_overlap(player1.x, player1.y, player1.w, player1.h, p[0], p[1], PUNCH_WIDTH, PUNCH_HEIGHT):
                 player1.hit(player2.facing)
                 player2.punches.remove(p)
 
@@ -121,54 +97,37 @@ def main():
         if speed_boost:
             speed_boost.update(platforms)
             speed_boost.draw(virtual)
-
             speed_boost.check_collision(player1)
             speed_boost.check_collision(player2)
+            if speed_boost.state == "USED": speed_boost = None
 
-        # Fell off screen without being collected
-        if speed_boost and speed_boost.state == "USED":
-            speed_boost = None
+        if heart:
+            heart.update(platforms)
+            heart.draw(virtual)
+            heart.check_collision(player1)
+            heart.check_collision(player2)
+            if heart.state == "USED": heart = None
 
         virtual.blit(p1_name_surf, (40, 104))
         virtual.blit(p2_name_surf, (VIRTUAL_SIZE[0] - 320, 104))
 
         mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), screen)
         mouse_click = pygame.mouse.get_pressed()[0]
-
         virtual.blit(game_quit_img, game_quit_rect)
 
         if game_quit_rect.collidepoint(mouse_pos) and mouse_click:
             running = False
 
-        if heart:
-            heart.update(platforms)  # falls down / lands on platforms
-            heart.draw(virtual)  # draw the heart
-
-            heart.check_collision(player1)
-            heart.check_collision(player2)
-
-            # Remove heart if collected or expired
-            if heart.state == "USED":
-                heart = None
-
         blit_scaled(screen, virtual)
         pygame.display.flip()
-
 
 def blit_scaled(screen, virtual):
     win_w, win_h = screen.get_size()
     scale = min(win_w / VIRTUAL_SIZE[0], win_h / VIRTUAL_SIZE[1])
-
-    scaled_w = int(VIRTUAL_SIZE[0] * scale)
-    scaled_h = int(VIRTUAL_SIZE[1] * scale)
-
+    scaled_w, scaled_h = int(VIRTUAL_SIZE[0] * scale), int(VIRTUAL_SIZE[1] * scale)
     scaled = pygame.transform.smoothscale(virtual, (scaled_w, scaled_h))
-
-    x = (win_w - scaled_w) // 2
-    y = (win_h - scaled_h) // 2
-
+    x, y = (win_w - scaled_w) // 2, (win_h - scaled_h) // 2
     screen.fill((0, 0, 0))
     screen.blit(scaled, (x, y))
-
 
 main()
