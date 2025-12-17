@@ -40,14 +40,6 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-            if event.type == pygame.KEYDOWN:
-                print(event.key)
-
-                if pygame.K_t:
-                    test_sfx.set_volume(1.0)
-                    test_sfx.play()
-
-
         virtual.blit((background), (0, 0))
 
         # for p in platforms:
