@@ -1,7 +1,7 @@
 import pygame
 import time
 import math
-from .powerups import SpeedBoost
+from powerups import SpeedBoost
 
 
 PUNCH_WIDTH = 120
