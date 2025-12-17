@@ -19,7 +19,7 @@ def main():
 
     speed_boost = None
     BOOST_EVENT = pygame.USEREVENT + 1
-    pygame.time.set_timer(BOOST_EVENT, 5000)  # spawn every 5 seconds
+    pygame.time.set_timer(BOOST_EVENT, 13000)  # spawn every 13 seconds
 
     punches_p1 = []
     punches_p2 = []
@@ -109,7 +109,7 @@ def main():
 
         # ---------- SPEED BOOST LOGIC ----------
         if speed_boost:
-            speed_boost.update()  # move down
+            speed_boost.update(platforms)  # move down to platforms
             speed_boost.draw(virtual)  # draw yellow square
 
             speed_boost.check_collision(player1)
@@ -119,12 +119,7 @@ def main():
             speed_boost.handle_timer(player2)
 
         # Fell off screen without being collected
-        if speed_boost and speed_boost.y > VIRTUAL_SIZE[1] and speed_boost.active:
-            speed_boost = None
-
-
-        # Boost finished
-        if speed_boost and not speed_boost.active and not speed_boost.used:
+        if speed_boost and speed_boost.state == "USED":
             speed_boost = None
 
 
