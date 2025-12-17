@@ -2,11 +2,12 @@ import pygame
 
 
 class Platform:
-    def __init__(self, xloc, yloc, width, height):
+    def __init__(self, xloc, yloc, width, height, fall_through):
         self.x = xloc
         self.y = yloc
         self.h = height
         self.w = width
+        self.fall_through = fall_through
 
     def draw(self, screen):
         pygame.draw.rect(

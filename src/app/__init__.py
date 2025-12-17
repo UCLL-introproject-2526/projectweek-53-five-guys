@@ -20,12 +20,12 @@ def main():
     background = pygame.transform.scale(background, (VIRTUAL_SIZE[0], VIRTUAL_SIZE[1]))
 
     platforms = [
-        Platform(280, 420, 470, 73),
-        Platform(1190, 420, 559, 73),
-        Platform(422, 758, 1084, 79),
-        Platform(524, 837, 223, 102),
-        Platform(1120, 837, 223, 102),
-        Platform(762, 869, 331, 135),
+        Platform(280, 420, 470, 73, True),
+        Platform(1190, 420, 559, 73, True),
+        Platform(422, 758, 1084, 79, False),
+        Platform(524, 837, 223, 102, False),
+        Platform(1120, 837, 223, 102, False),
+        Platform(762, 869, 331, 135, False),
     ]
 
     running = True

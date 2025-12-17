@@ -217,9 +217,13 @@ class Player:
                 self.down_tap_count = 1
             self.last_down_tap = current_time
 
-            if self.is_grounded and self.down_tap_count >= 2:
+            if (
+                self.is_grounded
+                and self.drop_platform is not None
+                and getattr(self.drop_platform, "fall_through", False)
+                and self.down_tap_count >= 2
+            ):
                 self.drop_through_until = current_time + 0.8
-
                 self.is_grounded = False
                 self.velocity_y = max(self.velocity_y, 1)
         if current_time - self.last_down_tap > 0.25:
@@ -230,6 +234,7 @@ class Player:
         self.y += self.velocity_y
 
         self.is_grounded = False
+
         if not self.dead:
             for p in platforms:
                 if (
@@ -275,6 +280,39 @@ class Player:
                 self.x -= int(ratio / 10)
                 if ratio < 70:
                     self.velocity_y -= 5
+
+        if not self.dead:
+            for p in platforms:
+                if (
+                    current_time < self.drop_through_until
+                    and self.drop_platform is not None
+                    and getattr(self.drop_platform, "fall_through", False)
+                    and p.x == self.drop_platform.x
+                    and p.y == self.drop_platform.y
+                    and p.w == self.drop_platform.w
+                    and p.h == self.drop_platform.h
+                ):
+                    continue
+                if self.rects_overlap(
+                    self.x,
+                    self.y,
+                    self.w,
+                    self.h,
+                    p.x,
+                    p.y,
+                    p.w,
+                    p.h,
+                ):
+                    if self.velocity_y > 0:
+                        self.y = p.y - self.h
+                        self.velocity_y = 0
+                        self.is_grounded = True
+                        self.jumps_left = self.max_jumps
+                        self.drop_platform = p
+                    elif self.velocity_y < 0:
+                        self.y = p.y + p.h
+                        self.velocity_y = 0
+                    break
 
         self.update_animation(moving_left, moving_right)
 
