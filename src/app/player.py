@@ -33,6 +33,9 @@ class Player:
         self.drop_through_until = 0
         self.down_held = False
         self.drop_platform = None
+        self.base_speed = 10
+        self.speed = self.base_speed
+
         self.heart_img = pygame.transform.scale(
             (pygame.image.load("assets/heart_full.png").convert_alpha()), (60, 60)
         )
@@ -197,8 +200,9 @@ class Player:
                 self.end_dash()
             moving_left = self.facing == "LEFT"
             moving_right = self.facing == "RIGHT"
+
         if keys[self.key_left] and not self.dead:
-            self.x -= 10
+            self.x -= self.speed
             moving_left = True
             self.facing = "LEFT"
             for p in platforms:
@@ -212,10 +216,11 @@ class Player:
                     p.w,
                     p.h,
                 ):
-                    self.x += 10
+                    self.x += self.speed
                     break
+
         if keys[self.key_right] and not self.dead:
-            self.x += 10
+            self.x += self.speed
             moving_right = True
             self.facing = "RIGHT"
             for p in platforms:
@@ -229,7 +234,7 @@ class Player:
                     p.w,
                     p.h,
                 ):
-                    self.x -= 10
+                    self.x -= self.speed
                     break
 
         for event in events:
