@@ -1,15 +1,17 @@
 import pygame
-from .platforms import Platform
-from .player import Player
-from .menu import startpage
-from .menu import screen_to_virtual
-from .powerups import SpeedBoost, Heart
+import random
+import asyncio
+from platforms import Platform
+from player import Player
+from menu import startpage
+from menu import screen_to_virtual
+from powerups import SpeedBoost, Heart
 
 
 VIRTUAL_SIZE = (1920, 1080)
 
 
-def main():
+async def main():
     # pygame.mixer.init()
     pygame.init()
 
@@ -171,4 +173,4 @@ def blit_scaled(screen, virtual):
     screen.blit(scaled, (x, y))
 
 
-main()
+asyncio.run(main())
