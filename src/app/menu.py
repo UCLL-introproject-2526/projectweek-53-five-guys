@@ -6,13 +6,10 @@ clock = pygame.time.Clock()
 
 def startpage(screen, real):
     screen_w, screen_h = VIRTUAL_SIZE
-    
-    CHAR_W, CHAR_H = 400, 409  
-    CHAR_SIDE_GAP = 650        
-    
+
     name1, name2 = "Player 1", "Player 2"
     active_box = None
-    
+
     selected_bg_index = 0
     bg_files = ["assets/background.png", "assets/background2.png", "assets/background3.png"]
 
@@ -20,13 +17,15 @@ def startpage(screen, real):
     #to use later
     title_font = pygame.font.Font("assets/font/PressStart2P-Regular.ttf", 32)
 
+    character_width, charcter_height = 400, 409  
     char1_img = pygame.image.load("assets/character/player_1_poster_choosing.png").convert_alpha()
     char2_img = pygame.image.load("assets/character/player_2_poster_choosing.png").convert_alpha()
-    char1_img = pygame.transform.smoothscale(char1_img, (CHAR_W, CHAR_H))
-    char2_img = pygame.transform.smoothscale(char2_img, (CHAR_W, CHAR_H))
+    char1_img = pygame.transform.smoothscale(char1_img, (character_width, charcter_height))
+    char2_img = pygame.transform.smoothscale(char2_img, (character_width, charcter_height))
 
-    char1_rect = char1_img.get_rect(center=(screen_w // 2 - CHAR_SIDE_GAP, screen_h // 2 + 100))
-    char2_rect = char2_img.get_rect(center=(screen_w // 2 + CHAR_SIDE_GAP, screen_h // 2 + 100))
+    character_between_gap = 650  
+    char1_rect = char1_img.get_rect(center=(screen_w // 2 - character_between_gap, screen_h // 2 + 100))
+    char2_rect = char2_img.get_rect(center=(screen_w // 2 + character_between_gap, screen_h // 2 + 100))
     
     box1_rect = pygame.Rect(char1_rect.centerx - 150, char1_rect.bottom + 10, 300, 50)
     box2_rect = pygame.Rect(char2_rect.centerx - 150, char2_rect.bottom + 10, 300, 50)
@@ -40,7 +39,7 @@ def startpage(screen, real):
         rect.center = (screen_w // 2, char1_rect.top + 220 + (i * 140))
         bg_rects.append(rect)
 
-    start_img = pygame.transform.scale(pygame.image.load("assets/button/start_game.png").convert_alpha(), (360, 75))
+    start_img = pygame.transform.scale(pygame.image.load("assets/button/start_game.png").convert_alpha(), (360, 150))
     start_rect = start_img.get_rect(center=(screen_w // 2, char1_rect.top - 50))
 
     while True:
@@ -72,8 +71,8 @@ def startpage(screen, real):
         bg_preview.set_alpha(150)
         screen.blit(bg_preview, (0, 0))
         
-        bg_title = input_font.render("SELECT BACKGROUND", True, (255, 255, 255))
-        screen.blit(bg_title, bg_title.get_rect(center=(screen_w // 2, char1_rect.top + 140)))
+        bg_choice_title = input_font.render("SELECT BACKGROUND", True, (255, 255, 255))
+        screen.blit(bg_choice_title, bg_choice_title.get_rect(center=(screen_w // 2, char1_rect.top + 140)))
         for i, r in enumerate(bg_rects):
             screen.blit(bg_thumbnails[i], r.topleft)
             if i == selected_bg_index: pygame.draw.rect(screen, (0, 255, 255), r, 4)
@@ -108,4 +107,5 @@ def screen_to_virtual(mouse_pos, screen):
     scale = min(win_w / VIRTUAL_SIZE[0], win_h / VIRTUAL_SIZE[1])
     scaled_w, scaled_h = int(VIRTUAL_SIZE[0] * scale), int(VIRTUAL_SIZE[1] * scale)
     ox, oy = (win_w - scaled_w) // 2, (win_h - scaled_h) // 2
+
     return int((mouse_pos[0] - ox) / scale), int((mouse_pos[1] - oy) / scale)
