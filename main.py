@@ -21,8 +21,10 @@ async def main():
     virtual = pygame.Surface(VIRTUAL_SIZE)
     clock = pygame.time.Clock()
 
-    while True:
-        player1_name, player2_name, background_img = startpage(virtual, screen)
+    test = True
+    while test:
+        player1_name, player2_name, background_img = ("Player 1", "Player 2", "assets/backgrounds/background1.png")
+        # asyncio.run(startpage(virtual, screen))
 
         player1 = Player(1)
         player2 = Player(2)
@@ -67,7 +69,7 @@ async def main():
 
         running = True
         while running:
-            clock.tick(60)
+            
             virtual.blit((background), (0, 0))
 
             events = pygame.event.get()
@@ -301,7 +303,10 @@ async def main():
 
             blit_scaled(screen, virtual)
             pygame.display.flip()
-
+            clock.tick(60)
+            await asyncio.sleep(0)
+            test = False
+        await asyncio.sleep(0)
 
 def blit_scaled(screen, virtual):
     win_w, win_h = screen.get_size()

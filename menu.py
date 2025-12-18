@@ -1,11 +1,12 @@
 import pygame
+import asyncio
 import sys
 
 VIRTUAL_SIZE = (1920, 1080)
 clock = pygame.time.Clock()
 
 
-def startpage(screen, real):
+async def startpage(screen, real):
     screen_w, screen_h = VIRTUAL_SIZE
 
     name1, name2 = "Player 1", "Player 2"
@@ -122,6 +123,9 @@ def startpage(screen, real):
             screen.blit(bg_thumbnails[i], r.topleft)
             if i == selected_bg_index:
                 pygame.draw.rect(screen, (0, 255, 255), r, 4)
+            await asyncio.sleep(0)
+
+        print("test")
 
         screen.blit(char1_img, char1_rect)
         screen.blit(char2_img, char2_rect)
@@ -153,6 +157,7 @@ def startpage(screen, real):
 
         blit_scaled(real, screen)
         pygame.display.flip()
+        await asyncio.wait(0)
 
 
 def blit_scaled(screen, virtual):
