@@ -14,7 +14,7 @@ VIRTUAL_SIZE = (1920, 1080)
 
 
 async def main():
-    pygame.mixer.init()
+    # pygame.mixer.init()
     pygame.init()
 
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
@@ -49,7 +49,7 @@ async def main():
             ("SPEED_BOOST", 0.2),
             ("HEART", 0.07),
             ("KATANA", 0.25),
-            ("GRENADE", 0.5)
+            ("GRENADE", 0.5),
         ]
         ITEM_SPAWN_EVENT = pygame.USEREVENT + 1
         pygame.time.set_timer(ITEM_SPAWN_EVENT, 1000)
@@ -77,7 +77,8 @@ async def main():
                 if event.type == ITEM_SPAWN_EVENT:
                     check = {
                         None: True,
-                        "SPEED_BOOST": speed_boost is None or speed_boost.state == "USED",
+                        "SPEED_BOOST": speed_boost is None
+                        or speed_boost.state == "USED",
                         "HEART": heart is None or heart.state == "USED",
                         "KATANA": katana is None or katana.state == "USED",
                         "GRENADE": grenade is None or grenade.state == "USED",
@@ -124,33 +125,37 @@ async def main():
             player2.core_logic(platforms, events)
             PUNCH_WIDTH = 70
             PUNCH_HEIGHT = 20
-            for p in player1.punches:
-                if player1.rects_overlap(
-                    player2.x,
-                    player2.y,
-                    player2.w,
-                    player2.h,
-                    p[0],
-                    p[1],
-                    PUNCH_WIDTH,
-                    PUNCH_HEIGHT,
-                ):
-                    player2.hit(player1.facing, p[3])
-                    player1.punches.remove(p)
+            if not player1.punch is None:
+                pygame.draw.rect(
+                    virtual,
+                    (255, 0, 0),
+                    (player1.punch[0], player1.punch[1], PUNCH_WIDTH, PUNCH_HEIGHT),
+                )
+            if not player1.punch is None and player1.rects_overlap(
+                player2.x,
+                player2.y,
+                player2.w,
+                player2.h,
+                player1.punch[0],
+                player1.punch[1],
+                PUNCH_WIDTH,
+                PUNCH_HEIGHT,
+            ):
+                player2.hit(player1.facing, player1.punch[3], False)
+                player1.punch = None
 
-            for p in player2.punches:
-                if player2.rects_overlap(
-                    player1.x,
-                    player1.y,
-                    player1.w,
-                    player1.h,
-                    p[0],
-                    p[1],
-                    PUNCH_WIDTH,
-                    PUNCH_HEIGHT,
-                ):
-                    player1.hit(player2.facing, p[3])
-                    player2.punches.remove(p)
+            if not player2.punch is None and player2.rects_overlap(
+                player1.x,
+                player1.y,
+                player1.w,
+                player1.h,
+                player2.punch[0],
+                player2.punch[1],
+                PUNCH_WIDTH,
+                PUNCH_HEIGHT,
+            ):
+                player1.hit(player2.facing, player2.punch[3], False)
+                player2.punch = None
 
             if not hasattr(player1, "dash_hit_done"):
                 player1.dash_hit_done = False
@@ -176,7 +181,7 @@ async def main():
                     player2.h,
                 )
             ):
-                player2.hit(player1.facing, player1.equiped_weapon)
+                player2.hit(player1.facing, player1.equiped_weapon, False)
                 player1.dash_hit_done = True
 
             if (
@@ -194,7 +199,7 @@ async def main():
                     player1.h,
                 )
             ):
-                player1.hit(player2.facing, player2.equiped_weapon)
+                player1.hit(player2.facing, player2.equiped_weapon, False)
                 player2.dash_hit_done = True
 
             for proj in list(player1.thrown_projectiles):

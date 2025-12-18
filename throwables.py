@@ -64,7 +64,7 @@ class ThrownKatana:
         )
         if hit:
             hit_from = "RIGHT" if self.vx > 0 else "LEFT"
-            player.hit(hit_from, self.weapon_ref)
+            player.hit(hit_from, self.weapon_ref, True)
             self.state = "USED"
 
 
@@ -179,6 +179,5 @@ class ThrownGrenade:
             )
             if hit:
                 hit_from = "RIGHT" if player.x > self.x else "LEFT"
-                player.hit(hit_from, self.weapon_ref)
+                player.hit(hit_from, self.weapon_ref, True)
                 self.hit_players.add(player.player)
-

@@ -98,18 +98,13 @@ class Player:
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == self.key_punch:
-                    self.punch()
+                    self.punched()
                 if event.key == self.key_dash:
                     self.start_dash(now_ms)
                 if event.key == self.key_block:
                     self.block()
                 if event.key == self.key_throw:
                     self.throw()
-
-        for p in self.punches:
-            now = pygame.time.get_ticks()
-            if now - p[2] >= 300:
-                self.punches.remove(p)
 
         if (
             keys[self.key_up]
@@ -232,9 +227,54 @@ class Player:
                         self.velocity_y = 0
                     break
 
+        if not self.punch is None:
+            if now - self.punch[2] >= 300:
+                self.punch = None
+            else:
+                if self.facing == "LEFT":
+                    punch_meta = (
+                        self.x,
+                        self.y + int(0.3 * self.h),
+                        self.punch[2],
+                        self.punch[3],
+                    )
+                else:
+                    punch_meta = (
+                        (self.x) + (self.w / 2),
+                        self.y + int(0.3 * self.h),
+                        self.punch[2],
+                        self.punch[3],
+                    )
+                self.punch = punch_meta
+
+        # new_punches = []
+        # for p in self.punche:
+        #     now = pygame.time.get_ticks()
+        #     if now - p[2] >= 300:
+        #         break
+        #
+        #     if self.facing == "LEFT":
+        #         punch_meta = (
+        #             self.x,
+        #             self.y + int(0.3 * self.h),
+        #             now,
+        #             self.equiped_weapon,
+        #         )
+        #     else:
+        #         punch_meta = (
+        #             (self.x * 0.9) + self.w,
+        #             self.y + int(0.3 * self.h),
+        #             now,
+        #             self.equiped_weapon,
+        #         )
+        #
+        #     new_punches.append(punch_meta)
+        #
+        # self.punches = new_punches
+
         self.update_animation(moving_left, moving_right)
 
-    def hit(self, hit_from, weapon):
+    def hit(self, hit_from, weapon, hit_by_throw):
         if self.is_blocking:
             return
 
@@ -244,12 +284,12 @@ class Player:
 
         if isinstance(weapon, Katana):
             self.health -= 33.5
-        elif isinstance(weapon, Grenade):
-            self.health -= 50
+        if hit_by_throw and isinstance(weapon, Grenade):
+            self.health -= 50.0
         else:
             self.health -= 10
 
-    def punch(self):
+    def punched(self):
         now = pygame.time.get_ticks()
         self.audio_logic("punch")
 
@@ -288,21 +328,21 @@ class Player:
 
         if self.facing == "LEFT":
             punch_meta = (
-                self.x - PUNCH_WIDTH,
+                self.x,
                 self.y + int(0.3 * self.h),
                 now,
                 self.equiped_weapon,
             )
         else:
             punch_meta = (
-                self.x + self.w,
+                (self.x) + (self.w / 2),
                 self.y + int(0.3 * self.h),
                 now,
                 self.equiped_weapon,
             )
 
         self.punched_on = now
-        self.punches.append(punch_meta)
+        self.punch = punch_meta
 
     def block(self):
         now = pygame.time.get_ticks()
@@ -696,7 +736,7 @@ class Player:
         self.h = 100
         self.health = 100
         self.lives = 3
-        self.punches = []
+        self.punch = None
         self.punched_on = 0
         self.got_hit = False
         self.hit_on = 0
