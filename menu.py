@@ -49,22 +49,25 @@ def startpage(screen, real):
 
     bg_thumbnails = []
     bg_rects = []
+    spacing = 250 
+    total_width = (len(bg_files) - 1) * spacing
+    start_x = (screen_w // 2) - (total_width // 2)
     for i, path in enumerate(bg_files):
         img = pygame.image.load(path).convert_alpha()
         bg_thumbnails.append(pygame.transform.smoothscale(img, (200, 110)))
         rect = pygame.Rect(0, 0, 200, 110)
-        rect.center = (screen_w // 2, char1_rect.top + 220 + (i * 140))
+        rect.center = (start_x + (i * spacing), char1_rect.top + 450)
         bg_rects.append(rect)
 
     start_img = pygame.transform.scale(
-        pygame.image.load("assets/button/start_game.png").convert_alpha(), (360, 150)
+        pygame.image.load("assets/button/start_game.png").convert_alpha(), (400, 150)
     )
-    start_rect = start_img.get_rect(center=(screen_w // 2, char1_rect.top - 140))
+    start_rect = start_img.get_rect(center=(screen_w // 2, char1_rect.top + 80))
 
     quit_img = pygame.transform.scale(
-        pygame.image.load("assets/button/quit_game.png").convert_alpha(), (360, 150)
+        pygame.image.load("assets/button/quit_game.png").convert_alpha(), (340, 150)
     )
-    quit_rect = quit_img.get_rect(center=(screen_w // 2, char1_rect.top - 40))
+    quit_rect = quit_img.get_rect(center=(screen_w // 2, char1_rect.top + 200))
 
     while True:
         mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), real)
@@ -107,7 +110,7 @@ def startpage(screen, real):
         bg_choice_title = input_font.render("SELECT BACKGROUND", True, (255, 255, 255))
         screen.blit(
             bg_choice_title,
-            bg_choice_title.get_rect(center=(screen_w // 2, char1_rect.top + 140)),
+            bg_choice_title.get_rect(center=(screen_w // 2, char1_rect.top + 300)),
         )
         for i, r in enumerate(bg_rects):
             screen.blit(bg_thumbnails[i], r.topleft)
@@ -139,8 +142,7 @@ def startpage(screen, real):
             return name1, name2, bg_files[selected_bg_index]
         
         if quit_rect.collidepoint(mouse_pos) and mouse_click:
-            pygame.quit()
-            sys.exit()
+            pygame.quit(); sys.exit()
 
         blit_scaled(real, screen)
         pygame.display.flip()
