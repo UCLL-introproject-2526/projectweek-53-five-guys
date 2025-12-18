@@ -243,7 +243,7 @@ class Player:
         self.got_hit = True
         
         if isinstance(weapon, Katana):
-            self.health -= 50
+            self.health -= 33.5
         elif isinstance(weapon, Grenade):
             self.health -= 50
         else:
