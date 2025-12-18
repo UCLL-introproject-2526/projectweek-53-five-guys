@@ -15,8 +15,8 @@ def startpage(screen, real):
     screen_w, screen_h = (1920, 1080)
     right_x = int(screen_w * 0.75)
 
-    name1 = "Player 1"
-    name2 = "Player 2"
+    name1 = "Player1 : "
+    name2 = "Player2 : "
     active_box = None
 
     input_font = pygame.font.Font("assets/font/Kaijuz.ttf", 24)

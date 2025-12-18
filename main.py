@@ -6,6 +6,8 @@ from player import Player
 from menu import startpage
 from menu import screen_to_virtual
 from powerups import SpeedBoost, Heart, Katana
+from end_page import EndPage
+import sys
 
 
 VIRTUAL_SIZE = (1920, 1080)
@@ -13,18 +15,20 @@ VIRTUAL_SIZE = (1920, 1080)
 
 async def main():
     # pygame.mixer.init()
-    pygame.init()
+  pygame.init()
 
-    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-    virtual = pygame.Surface(VIRTUAL_SIZE)
-    clock = pygame.time.Clock()
+  screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+  virtual = pygame.Surface(VIRTUAL_SIZE)
+  clock = pygame.time.Clock()
+
+  while True:  # RESTART LOOP for the end page to restart
 
     player1_name, player2_name = startpage(virtual, screen)
 
     player1 = Player(1)
     player2 = Player(2)
 
-    background = pygame.image.load("assets/background.png").convert()
+    background = pygame.image.load("assets/background2.png").convert()
     background = pygame.transform.scale(background, (VIRTUAL_SIZE[0], VIRTUAL_SIZE[1]))
 
     game_quit_img = pygame.image.load("assets/button/quit2.png").convert_alpha()
@@ -56,6 +60,8 @@ async def main():
         Platform(762, 869, 331, 135, False),
     ]
 
+    end_page = EndPage() #nnnnnnn
+
     running = True
     while running:
         clock.tick(60)
@@ -72,6 +78,16 @@ async def main():
                     heart = Heart()
             if event.type == KATANA_EVENT and katana is None:
                 katana = Katana()
+
+        
+
+        mouse_click = any(   #nnnnnn
+         event.type == pygame.MOUSEBUTTONDOWN and event.button == 1
+         for event in events)
+        
+        mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), screen)
+        # mouse_click = pygame.mouse.get_pressed()[0]
+
 
         virtual.blit((background), (0, 0))
 
@@ -112,6 +128,38 @@ async def main():
 
         player1.check_death(VIRTUAL_SIZE[1])
         player2.check_death(VIRTUAL_SIZE[1])
+
+
+            
+        if player1.lives <= 0 or player2.lives <= 0: #nnn for end page
+
+            if player1.lives <= 0:
+                winner_name = player2_name
+                loser_name = player1_name
+            else:
+                winner_name = player1_name
+                loser_name = player2_name
+
+            action = end_page.handle_input(mouse_pos, mouse_click)
+            end_page.draw(virtual, winner_name, mouse_pos, mouse_click)
+
+
+            blit_scaled(screen, virtual)
+            pygame.display.flip()
+
+            if action == "restart":
+                break  
+
+            if action == "quit":
+                pygame.quit()
+                sys.exit()
+
+            continue
+        
+
+
+
+
 
         player1.x = max(0, min(VIRTUAL_SIZE[0] - player1.w, player1.x))
         player2.x = max(0, min(VIRTUAL_SIZE[0] - player2.w, player2.x))
@@ -162,8 +210,8 @@ async def main():
         virtual.blit(p1_name_surf, (40, 104))
         virtual.blit(p2_name_surf, (VIRTUAL_SIZE[0] - 320, 104))
 
-        mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), screen)
-        mouse_click = pygame.mouse.get_pressed()[0]
+        # mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), screen)  # moved to top after event handling 
+        # mouse_click = pygame.mouse.get_pressed()[0]
 
         virtual.blit(game_quit_img, game_quit_rect)
 
