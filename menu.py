@@ -75,6 +75,11 @@ def startpage(screen, real):
     )
     quit_rect = quit_img.get_rect(center=(screen_w // 2, char1_rect.top + 200))
 
+    manual_img = pygame.transform.scale(
+        pygame.image.load("assets/button/manual_button.png").convert_alpha(), (200, 80)
+    )
+    manual_rect = manual_img.get_rect(bottomright=(screen_w - 50, screen_h - 50))
+
     while True:
         mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), real)
         mouse_click = pygame.mouse.get_pressed()[0]
@@ -144,12 +149,16 @@ def startpage(screen, real):
         screen.blit(start_img, start_rect)
         screen.blit(quit_img, quit_rect)
         screen.blit(logo_img, logo_rect)
+        screen.blit(manual_img, manual_rect)
 
         if start_rect.collidepoint(mouse_pos) and mouse_click:
             return name1, name2, bg_files[selected_bg_index]
         
         if quit_rect.collidepoint(mouse_pos) and mouse_click:
             pygame.quit(); sys.exit()
+
+        if manual_rect.collidepoint(mouse_pos):
+            pygame.draw.rect(screen, (255, 255, 255), manual_rect.inflate(10, 10), 2)
 
         blit_scaled(real, screen)
         pygame.display.flip()
