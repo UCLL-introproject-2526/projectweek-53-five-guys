@@ -12,24 +12,19 @@ Health shown with hearts ❤️
 
 ## Character & Combat Code
 - [ ] `Player` class
-- [ ] Add punch movement
-- [ ] attacking
-- [ ] Taking damage
-- [ ] Health bar pixels style
+- [ ] Add blocking movement
+- [ ] Add new weapon
 
 ---
 
 ## Map & Collision
 - [ ] `Platform` class
-- [ ] Maze layout (tiles or grid)
-- [ ] Keep players inside map
+- [ ] Maybe new map
 
 
 ---
 
 ## Game Logic & Controls
-- [ ] Player 1 controls (Attack keys)
-- [ ] Player 2 controls (Attack keys)
-- [ ] Health system (hearts go down)
-- [ ] Win condition & restart
+- [ ] Publish the game
+- [ ] Clean up the code
 
