@@ -581,20 +581,25 @@ class Player:
     def rects_overlap(self, px, py, pw, ph, x, y, w, h):
         return not (px + pw <= x or px >= x + w or py + ph <= y or py >= y + h)
 
-    def audio_logic(self, audioName):
-        try:
-            sfx = pygame.mixer.Sound(f"assets/audio/{audioName}.wav")
-            sfx.set_volume(1.0)
-            sfx.play()
-        except pygame.error:
-            pass
+    
 
     def check_death(self, screen_height):
         RESPAWN_DELAY = 2500  # 1 second
 
         now = pygame.time.get_ticks()
 
-        if (self.y >= screen_height and not self.dead) or (
+        if self.y >= screen_height and not self.dead:
+            self.dead = True
+            self.death_time = now
+            self.lives -= 1
+            self.health = 0
+            
+            # --- ONLY PLAYS ON FALL ---
+            self.audio_logic("fall_to_death") 
+            
+            self.velocity_y -= 20
+
+        elif (self.y >= screen_height and not self.dead) or (
             self.health <= 0 and not self.dead
         ):
             self.dead = True
@@ -652,6 +657,14 @@ class Player:
     def is_invincible(self):
         return pygame.time.get_ticks() < self.invincible_until
 
+    def audio_logic(self, audioName):
+        try:
+            sfx = pygame.mixer.Sound(f"assets/audio/{audioName}.wav")
+            sfx.set_volume(1.0)
+            sfx.play()
+        except pygame.error:
+            pass
+    
     def map_value(self, x, in_min, in_max, out_min, out_max):
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
@@ -724,7 +737,7 @@ class Player:
             self.key_down = pygame.K_s
             self.key_punch = pygame.K_e
             self.key_dash = pygame.K_r
-            self.key_block = pygame.K_q
+            self.key_block = pygame.K_f
             self.x = 550
             self.respawn_x = 550
             self.y = 400

@@ -101,7 +101,7 @@ class Heart(PowerUp):
 
     @property
     def image(self):
-        img = pygame.image.load("assets/heart_full.png").convert_alpha()
+        img = pygame.image.load("assets/items/heart_full.png").convert_alpha()
         return pygame.transform.scale(img, (self.size, self.size))
 
     def apply(self, player):
