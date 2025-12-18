@@ -43,11 +43,11 @@ async def main():
         speed_boost = None
         heart = None
         katana = None
-        powerups = [
-            (None, 0.8),
+        POWERUP_POOL = [
+            (None, 0.02),
             ("SPEED_BOOST", 0.1),
             ("HEART", 0.07),
-            ("KATANA", 0.03),
+            ("KATANA", 0.8),
         ]
         ITEM_SPAWN_EVENT = pygame.USEREVENT + 1
         pygame.time.set_timer(ITEM_SPAWN_EVENT, 1000)
@@ -72,28 +72,25 @@ async def main():
             for event in events:
                 if event.type == pygame.QUIT:
                     running = False
-                if event.type == ITEM_SPAWN_EVENT and speed_boost is None:
+                if event.type == ITEM_SPAWN_EVENT:
                     check = {
                         None: True,
-                        "SPEED_BOOST": speed_boost == None,
-                        "HEART": heart == None,
-                        "KATANA": katana == None,
+                        "SPEED_BOOST": speed_boost is None,
+                        "HEART": heart is None,
+                        "KATANA": katana is None,
                     }
-                    powerups = [p for p in powerups if check[p[0]]]
+                    available = [p for p in POWERUP_POOL if check[p[0]]]
 
-                    cum = 0.0
-                    for p in powerups:
-                        cum += p[1]
+                    cum = sum(p[1] for p in available)
                     if cum < 1.0:
-                        powerups.append((None, 1.0 - cum))
+                        available.append((None, 1.0 - cum))
 
                     r = random.random()
-                    cum = 0.0
+                    acc = 0.0
                     result = None
-
-                    for outcome, p in powerups:
-                        cum += p
-                        if r < cum:
+                    for outcome, prob in available:
+                        acc += prob
+                        if r < acc:
                             result = outcome
                             break
 
@@ -149,6 +146,56 @@ async def main():
                 ):
                     player1.hit(player2.facing, p[3])
                     player2.punches.remove(p)
+
+            # Dash-through damage with Katana (one hit per dash)
+            # Initialize and reset flags when not dashing
+            if not hasattr(player1, "dash_hit_done"):
+                player1.dash_hit_done = False
+            if not hasattr(player2, "dash_hit_done"):
+                player2.dash_hit_done = False
+            if not player1.is_dashing:
+                player1.dash_hit_done = False
+            if not player2.is_dashing:
+                player2.dash_hit_done = False
+
+            if (
+                player1.is_dashing
+                and isinstance(player1.equiped_weapon, Katana)
+                and not player1.dash_hit_done
+                and player1.rects_overlap(
+                    player1.x, player1.y, player1.w, player1.h,
+                    player2.x, player2.y, player2.w, player2.h
+                )
+            ):
+                player2.hit(player1.facing, player1.equiped_weapon)
+                player1.dash_hit_done = True
+
+            if (
+                player2.is_dashing
+                and isinstance(player2.equiped_weapon, Katana)
+                and not player2.dash_hit_done
+                and player2.rects_overlap(
+                    player2.x, player2.y, player2.w, player2.h,
+                    player1.x, player1.y, player1.w, player1.h
+                )
+            ):
+                player1.hit(player2.facing, player2.equiped_weapon)
+                player2.dash_hit_done = True
+
+            
+            for proj in list(player1.thrown_projectiles):
+                proj.update(platforms)
+                proj.draw(virtual)
+                proj.check_collision(player2)
+                if proj.state == "USED":
+                    player1.thrown_projectiles.remove(proj)
+
+            for proj in list(player2.thrown_projectiles):
+                proj.update(platforms)
+                proj.draw(virtual)
+                proj.check_collision(player1)
+                if proj.state == "USED":
+                    player2.thrown_projectiles.remove(proj)
 
             player1.check_death(VIRTUAL_SIZE[1])
             player2.check_death(VIRTUAL_SIZE[1])
