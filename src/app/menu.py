@@ -11,7 +11,7 @@ def startpage(screen, real):
     active_box = None
 
     selected_bg_index = 0
-    bg_files = ["assets/background.png", "assets/background2.png", "assets/background3.png"]
+    bg_files = ["assets/backgrounds/background.png", "assets/backgrounds/background2.png", "assets/backgrounds/background3.png"]
 
     input_font = pygame.font.Font("assets/font/PressStart2P-Regular.ttf", 24)
     #to use later
