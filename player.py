@@ -10,199 +10,6 @@ PUNCH_HEIGHT = 50
 
 
 class Player:
-    def __init__(self, player):
-        self.player = player
-        self.w = 100
-        self.h = 100
-
-        self.health = 100
-        self.lives = 3
-
-        self.punches = []
-        self.punched_on = 0
-        self.got_hit = False
-        self.hit_on = 0
-        self.hit_from = "RIGHT"
-
-        self.velocity_y = 0
-        self.gravity = 1
-        self.jump_strength = -24
-        self.is_grounded = False
-        self.jumps_left = 2
-        self.max_jumps = 2
-        self.jump_held = False
-        self.last_down_tap = 0
-        self.down_tap_count = 0
-        self.drop_through_until = 0
-        self.down_held = False
-        self.drop_platform = None
-        self.base_speed = 10
-        self.speed = self.base_speed
-
-        self.active_powerups = []
-        self.equiped_weapon = None
-
-        self.heart_img = pygame.transform.scale(
-            (pygame.image.load("assets/heart_full.png").convert_alpha()), (60, 60)
-        )
-        self.death_img = pygame.transform.scale(
-            pygame.image.load(f"assets/player_{player}/death.png").convert_alpha(),
-            (self.w * 0.70, self.h * 0.83),
-        )
-        self.victory_img = pygame.transform.scale(
-            pygame.image.load(f"assets/player_{player}/victory.png").convert_alpha(),
-            (self.w, self.h),
-        )
-
-        if player == 1:
-            self.key_left = pygame.K_a
-            self.key_right = pygame.K_d
-            self.key_up = pygame.K_w
-            self.key_down = pygame.K_s
-            self.key_punch = pygame.K_e
-            self.key_dash = pygame.K_r
-            self.x = 550
-            self.respawn_x = 550
-            self.y = 400
-            self.respawn_y = 400
-        else:
-            self.key_left = pygame.K_LEFT
-            self.key_right = pygame.K_RIGHT
-            self.key_up = pygame.K_UP
-            self.key_down = pygame.K_DOWN
-            self.key_punch = pygame.K_m
-            self.key_dash = pygame.K_n
-            self.x = 1470
-            self.respawn_x = 1470
-            self.y = 400
-            self.respawn_y = 400
-
-        self.dead = False
-        self.death_time = 0
-        self.respawn_y = 290
-
-        if self.player == 1:
-            base = "assets/player_1"
-            items = 12
-        else:
-            base = "assets/player_2"
-            items = 6
-
-        self.walk_right = [
-            pygame.image.load(f"{base}/right/movement_right_{i}.png").convert_alpha()
-            for i in range(1, items)
-        ]
-
-        self.walk_left = [
-            pygame.image.load(f"{base}/left/movement_left_{i}.png").convert_alpha()
-            for i in range(1, items)
-        ]
-
-        if self.player == 1:
-            self.jump_img = pygame.image.load(
-                f"{base}/movement_jumping.png"
-            ).convert_alpha()
-            self.fall_img = pygame.image.load(
-                f"{base}/movement_falling.png"
-            ).convert_alpha()
-        else:
-            self.jump_img = pygame.image.load(
-                f"{base}/movement_jumping.png"
-            ).convert_alpha()
-            self.fall_img = pygame.image.load(
-                f"{base}/movement_falling.png"
-            ).convert_alpha()
-
-        self.walk_right = [
-            pygame.transform.scale(img, (self.w, self.h)) for img in self.walk_right
-        ]
-        self.walk_left = [
-            pygame.transform.scale(img, (self.w, self.h)) for img in self.walk_left
-        ]
-        self.jump_img = pygame.transform.scale(self.jump_img, (0.75 * self.w, self.h))
-        self.fall_img = pygame.transform.scale(self.fall_img, (self.w, self.h))
-
-        self.attack_right = [
-            pygame.image.load(f"{base}/attack/attack_right_{i}.png").convert_alpha()
-            for i in range(1, 4)
-        ]
-        self.attack_left = [
-            pygame.image.load(f"{base}/attack/attack_left_{i}.png").convert_alpha()
-            for i in range(1, 4)
-        ]
-        self.attack_right = [
-            pygame.transform.scale(img, (self.w, self.h)) for img in self.attack_right
-        ]
-        self.attack_left = [
-            pygame.transform.scale(img, (self.w, self.h)) for img in self.attack_left
-        ]
-
-        self.idle_img = pygame.transform.scale(
-            pygame.image.load(f"assets/player_{player}/idle.png").convert_alpha(),
-            (self.w, self.h),
-        )
-
-        self.dash_right = pygame.transform.scale(
-            pygame.image.load(
-                f"assets/player_{player}/dash/dash_right.png"
-            ).convert_alpha(),
-            (self.w, self.h),
-        )
-        self.dash_left = pygame.transform.scale(
-            pygame.image.load(
-                f"assets/player_{player}/dash/dash_left.png"
-            ).convert_alpha(),
-            (self.w, self.h),
-        )
-
-        self.katana_attack_right = [
-            pygame.image.load(
-                f"assets/player_{player}/katana/katana_right_{i}.png"
-            ).convert_alpha()
-            for i in range(1, 4)
-        ]
-        self.katana_attack_left = [
-            pygame.image.load(
-                f"assets/player_{player}/katana/katana_left_{i}.png"
-            ).convert_alpha()
-            for i in range(1, 4)
-        ]
-        self.katana_attack_right = [
-            pygame.transform.scale(img, (self.w, self.h))
-            for img in self.katana_attack_right
-        ]
-        self.katana_attack_left = [
-            pygame.transform.scale(img, (self.w, self.h))
-            for img in self.katana_attack_left
-        ]
-        self.blood_img = pygame.image.load("assets/blood.png").convert_alpha()
-        self.blood_img = pygame.transform.scale(self.blood_img, (80, 80))
-        self.blood_splashes = []
-
-        self.facing = "RIGHT"
-        self.frame_index = 0
-        self.anim_timer = 0
-        self.anim_speed = 8
-
-        self.is_attacking = False
-        self.attack_frame = 0
-        self.attack_anim_speed = 5
-
-        self.attack_frame_duration_ms = 90
-        self.last_attack_frame_at = 0
-
-        self.is_dashing = False
-        self.dash_speed = 28
-        self.dash_duration_ms = 220
-        self.dash_cooldown_ms = 800
-        self.dash_until = 0
-        self.last_dash_at = -9999
-        self.invincible_until = 0
-        self.dash_frame = 0
-        self.dash_anim_speed = 4
-
-        self.current_img = self.idle_img
-
     def core_logic(self, platforms, events):
         keys = pygame.key.get_pressed()
         now_ms = pygame.time.get_ticks()
@@ -812,3 +619,171 @@ class Player:
 
     def map_value(self, x, in_min, in_max, out_min, out_max):
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
+    def __init__(self, player):
+        self.player = player
+        self.w = 100
+        self.h = 100
+        self.health = 100
+        self.lives = 3
+        self.punches = []
+        self.punched_on = 0
+        self.got_hit = False
+        self.hit_on = 0
+        self.hit_from = "RIGHT"
+        self.velocity_y = 0
+        self.gravity = 1
+        self.jump_strength = -24
+        self.is_grounded = False
+        self.jumps_left = 2
+        self.max_jumps = 2
+        self.jump_held = False
+        self.last_down_tap = 0
+        self.down_tap_count = 0
+        self.drop_through_until = 0
+        self.down_held = False
+        self.drop_platform = None
+        self.base_speed = 10
+        self.speed = self.base_speed
+        self.dead = False
+        self.death_time = 0
+        self.respawn_y = 290
+        self.active_powerups = []
+        self.equiped_weapon = None
+        self.blood_img = pygame.image.load("assets/blood.png").convert_alpha()
+        self.blood_img = pygame.transform.scale(self.blood_img, (80, 80))
+        self.blood_splashes = []
+        self.facing = "RIGHT"
+        self.frame_index = 0
+        self.anim_timer = 0
+        self.anim_speed = 8
+        self.is_attacking = False
+        self.attack_frame = 0
+        self.attack_anim_speed = 5
+        self.attack_frame_duration_ms = 90
+        self.last_attack_frame_at = 0
+        self.is_dashing = False
+        self.dash_speed = 28
+        self.dash_duration_ms = 220
+        self.dash_cooldown_ms = 800
+        self.dash_until = 0
+        self.last_dash_at = -9999
+        self.invincible_until = 0
+        self.dash_frame = 0
+        self.dash_anim_speed = 4
+
+        if player == 1:
+            self.key_left = pygame.K_a
+            self.key_right = pygame.K_d
+            self.key_up = pygame.K_w
+            self.key_down = pygame.K_s
+            self.key_punch = pygame.K_e
+            self.key_dash = pygame.K_r
+            self.x = 550
+            self.respawn_x = 550
+            self.y = 400
+            self.respawn_y = 400
+            base = "assets/player_1"
+            items = 12
+        else:
+            self.key_left = pygame.K_LEFT
+            self.key_right = pygame.K_RIGHT
+            self.key_up = pygame.K_UP
+            self.key_down = pygame.K_DOWN
+            self.key_punch = pygame.K_m
+            self.key_dash = pygame.K_n
+            self.x = 1470
+            self.respawn_x = 1470
+            self.y = 400
+            self.respawn_y = 400
+            base = "assets/player_2"
+            items = 6
+
+        self.jump_img = pygame.image.load(
+            f"{base}/movement_jumping.png"
+        ).convert_alpha()
+        self.fall_img = pygame.image.load(
+            f"{base}/movement_falling.png"
+        ).convert_alpha()
+        self.heart_img = pygame.transform.scale(
+            (pygame.image.load("assets/heart_full.png").convert_alpha()), (60, 60)
+        )
+        self.death_img = pygame.transform.scale(
+            pygame.image.load(f"assets/player_{player}/death.png").convert_alpha(),
+            (self.w * 0.70, self.h * 0.83),
+        )
+        self.victory_img = pygame.transform.scale(
+            pygame.image.load(f"assets/player_{player}/victory.png").convert_alpha(),
+            (self.w, self.h),
+        )
+        self.walk_right = [
+            pygame.image.load(f"{base}/right/movement_right_{i}.png").convert_alpha()
+            for i in range(1, items)
+        ]
+        self.walk_left = [
+            pygame.image.load(f"{base}/left/movement_left_{i}.png").convert_alpha()
+            for i in range(1, items)
+        ]
+        self.walk_right = [
+            pygame.transform.scale(img, (self.w, self.h)) for img in self.walk_right
+        ]
+        self.walk_left = [
+            pygame.transform.scale(img, (self.w, self.h)) for img in self.walk_left
+        ]
+        self.jump_img = pygame.transform.scale(self.jump_img, (0.75 * self.w, self.h))
+        self.fall_img = pygame.transform.scale(self.fall_img, (self.w, self.h))
+
+        self.attack_right = [
+            pygame.image.load(f"{base}/attack/attack_right_{i}.png").convert_alpha()
+            for i in range(1, 4)
+        ]
+        self.attack_left = [
+            pygame.image.load(f"{base}/attack/attack_left_{i}.png").convert_alpha()
+            for i in range(1, 4)
+        ]
+        self.attack_right = [
+            pygame.transform.scale(img, (self.w, self.h)) for img in self.attack_right
+        ]
+        self.attack_left = [
+            pygame.transform.scale(img, (self.w, self.h)) for img in self.attack_left
+        ]
+
+        self.idle_img = pygame.transform.scale(
+            pygame.image.load(f"assets/player_{player}/idle.png").convert_alpha(),
+            (self.w, self.h),
+        )
+        self.current_img = self.idle_img
+
+        self.dash_right = pygame.transform.scale(
+            pygame.image.load(
+                f"assets/player_{player}/dash/dash_right.png"
+            ).convert_alpha(),
+            (self.w, self.h),
+        )
+        self.dash_left = pygame.transform.scale(
+            pygame.image.load(
+                f"assets/player_{player}/dash/dash_left.png"
+            ).convert_alpha(),
+            (self.w, self.h),
+        )
+
+        self.katana_attack_right = [
+            pygame.image.load(
+                f"assets/player_{player}/katana/katana_right_{i}.png"
+            ).convert_alpha()
+            for i in range(1, 4)
+        ]
+        self.katana_attack_left = [
+            pygame.image.load(
+                f"assets/player_{player}/katana/katana_left_{i}.png"
+            ).convert_alpha()
+            for i in range(1, 4)
+        ]
+        self.katana_attack_right = [
+            pygame.transform.scale(img, (self.w, self.h))
+            for img in self.katana_attack_right
+        ]
+        self.katana_attack_left = [
+            pygame.transform.scale(img, (self.w, self.h))
+            for img in self.katana_attack_left
+        ]
