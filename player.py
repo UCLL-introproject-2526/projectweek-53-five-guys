@@ -604,20 +604,22 @@ class Player:
     def rects_overlap(self, px, py, pw, ph, x, y, w, h):
         return not (px + pw <= x or px >= x + w or py + ph <= y or py >= y + h)
 
-    def audio_logic(self, audioName):
-        try:
-            sfx = pygame.mixer.Sound(f"assets/audio/{audioName}.wav")
-            sfx.set_volume(1.0)
-            sfx.play()
-        except pygame.error:
-            pass
-
     def check_death(self, screen_height):
         RESPAWN_DELAY = 2500  # 1 second
 
         now = pygame.time.get_ticks()
 
-        if (self.y >= screen_height and not self.dead) or (
+        if self.y >= screen_height and not self.dead:
+            self.dead = True
+            self.death_time = now
+            self.lives -= 1
+            self.health = 0
+
+            self.audio_logic("fall_to_death")
+
+            self.velocity_y -= 20
+
+        elif (self.y >= screen_height and not self.dead) or (
             self.health <= 0 and not self.dead
         ):
             self.dead = True
@@ -662,6 +664,7 @@ class Player:
             return
         if now_ms - self.last_dash_at < self.dash_cooldown_ms:
             return
+        self.audio_logic("dash")
         self.is_dashing = True
         self.dash_until = now_ms + self.dash_duration_ms
         self.last_dash_at = now_ms
@@ -675,6 +678,14 @@ class Player:
 
     def is_invincible(self):
         return pygame.time.get_ticks() < self.invincible_until
+
+    def audio_logic(self, audioName):
+        try:
+            sfx = pygame.mixer.Sound(f"assets/audio/{audioName}.wav")
+            sfx.set_volume(1.0)
+            sfx.play()
+        except pygame.error:
+            pass
 
     def map_value(self, x, in_min, in_max, out_min, out_max):
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
@@ -709,7 +720,7 @@ class Player:
         self.respawn_y = 290
         self.active_powerups = []
         self.equiped_weapon = None
-        self.blood_img = pygame.image.load("assets/blood.png").convert_alpha()
+        self.blood_img = pygame.image.load("assets/items/blood.png").convert_alpha()
         self.blood_img = pygame.transform.scale(self.blood_img, (80, 80))
         self.blood_splashes = []
         self.facing = "RIGHT"
@@ -750,7 +761,7 @@ class Player:
             self.key_down = pygame.K_s
             self.key_punch = pygame.K_e
             self.key_dash = pygame.K_r
-            self.key_block = pygame.K_q
+            self.key_block = pygame.K_f
             self.key_throw = pygame.K_t
             self.x = 550
             self.respawn_x = 550
@@ -781,7 +792,7 @@ class Player:
             f"{base}/movement_falling.png"
         ).convert_alpha()
         self.heart_img = pygame.transform.scale(
-            (pygame.image.load("assets/heart_full.png").convert_alpha()), (60, 60)
+            (pygame.image.load("assets/items/heart_full.png").convert_alpha()), (60, 60)
         )
         self.death_img = pygame.transform.scale(
             pygame.image.load(f"assets/player_{player}/death.png").convert_alpha(),
