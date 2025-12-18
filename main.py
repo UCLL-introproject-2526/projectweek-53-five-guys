@@ -36,16 +36,11 @@ async def main():
     p2_name_surf = name_font.render(player2_name, True, (255, 255, 255))
 
     speed_boost = None
-    BOOST_EVENT = pygame.USEREVENT + 1
-    pygame.time.set_timer(BOOST_EVENT, 13000)  # spawn every 13 seconds
-
     heart = None
-    HEART_EVENT = pygame.USEREVENT + 2
-    pygame.time.set_timer(HEART_EVENT, 20000)
-
     katana = None
-    KATANA_EVENT = pygame.USEREVENT + 3
-    pygame.time.set_timer(KATANA_EVENT, 20000)
+    powerups = [(None, 0.8), ("SPEED_BOOST", 0.1), ("HEART", 0.07), ("KATANA", 0.03)]
+    ITEM_SPAWN_EVENT = pygame.USEREVENT + 1
+    pygame.time.set_timer(ITEM_SPAWN_EVENT, 1000)
 
     platforms = [
         Platform(280, 420, 470, 73, True),
@@ -65,13 +60,40 @@ async def main():
         for event in events:
             if event.type == pygame.QUIT:
                 running = False
-            if event.type == BOOST_EVENT and speed_boost is None:
-                speed_boost = SpeedBoost()
-            if event.type == HEART_EVENT and heart is None:
-                if random.random() <= 0.3:
-                    heart = Heart()
-            if event.type == KATANA_EVENT and katana is None:
-                katana = Katana()
+            if event.type == ITEM_SPAWN_EVENT and speed_boost is None:
+                check = {
+                    None: True,
+                    "SPEED_BOOST": speed_boost == None,
+                    "HEART": heart == None,
+                    "KATANA": katana == None,
+                }
+                powerups = [p for p in powerups if check[p[0]]]
+
+                cum = 0.0
+                for p in powerups:
+                    cum += p[1]
+                if cum < 1.0:
+                    powerups.append((None, 1.0 - cum))
+
+                r = random.random()
+                cum = 0.0
+                result = None
+
+                for outcome, p in powerups:
+                    cum += p
+                    if r < cum:
+                        result = outcome
+                        break
+
+                match result:
+                    case None:
+                        pass
+                    case "SPEED_BOOST":
+                        speed_boost = SpeedBoost()
+                    case "HEART":
+                        heart = Heart()
+                    case "KATANA":
+                        katana = Katana()
 
         virtual.blit((background), (0, 0))
 
