@@ -14,15 +14,20 @@ VIRTUAL_SIZE = (1920, 1080)
 
 
 async def main():
-    # pygame.mixer.init()
+    pygame.mixer.init()
     pygame.init()
 
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     virtual = pygame.Surface(VIRTUAL_SIZE)
     clock = pygame.time.Clock()
 
+    pygame.mixer.music.load("assets/audio/background_menu_song.wav")
+    pygame.mixer.music.play(-1)
+
     while True:
         player1_name, player2_name, background_img = startpage(virtual, screen)
+
+        pygame.mixer.music.stop()
 
         player1 = Player(1)
         player2 = Player(2)
@@ -118,19 +123,19 @@ async def main():
 
             virtual.blit((background), (0, 0))
 
-            #for p in platforms:
-                #p.draw(virtual)
+            # for p in platforms:
+            # p.draw(virtual)
 
             player1.core_logic(platforms, events)
             player2.core_logic(platforms, events)
             PUNCH_WIDTH = 70
             PUNCH_HEIGHT = 20
-            if not player1.punch is None:
-                pygame.draw.rect(
-                    virtual,
-                    (255, 0, 0),
-                    (player1.punch[0], player1.punch[1], PUNCH_WIDTH, PUNCH_HEIGHT),
-                )
+            # if not player1.punch is None:
+            #     pygame.draw.rect(
+            #         virtual,
+            #         (255, 0, 0),
+            #         (player1.punch[0], player1.punch[1], PUNCH_WIDTH, PUNCH_HEIGHT),
+            #     )
             if not player1.punch is None and player1.rects_overlap(
                 player2.x,
                 player2.y,
