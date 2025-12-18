@@ -13,7 +13,7 @@ def startpage(screen, real):
 
     selected_bg_index = 0
     bg_files = [
-        "assets/backgrounds/background.png",
+        "assets/backgrounds/background1.png",
         "assets/backgrounds/background2.png",
         "assets/backgrounds/background3.png",
     ]
@@ -24,10 +24,10 @@ def startpage(screen, real):
 
     character_width, charcter_height = 400, 409
     char1_img = pygame.image.load(
-        "assets/character/player_1_poster_choosing.png"
+        "assets/player_1/player_1_poster.png"
     ).convert_alpha()
     char2_img = pygame.image.load(
-        "assets/character/player_2_poster_choosing.png"
+        "assets/player_2/player_2_poster.png"
     ).convert_alpha()
     char1_img = pygame.transform.smoothscale(
         char1_img, (character_width, charcter_height)
@@ -59,7 +59,12 @@ def startpage(screen, real):
     start_img = pygame.transform.scale(
         pygame.image.load("assets/button/start_game.png").convert_alpha(), (360, 150)
     )
-    start_rect = start_img.get_rect(center=(screen_w // 2, char1_rect.top - 50))
+    start_rect = start_img.get_rect(center=(screen_w // 2, char1_rect.top - 140))
+
+    quit_img = pygame.transform.scale(
+        pygame.image.load("assets/button/quit_game.png").convert_alpha(), (360, 150)
+    )
+    quit_rect = quit_img.get_rect(center=(screen_w // 2, char1_rect.top - 40))
 
     while True:
         mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), real)
@@ -128,9 +133,14 @@ def startpage(screen, real):
         )
 
         screen.blit(start_img, start_rect)
+        screen.blit(quit_img, quit_rect)
 
         if start_rect.collidepoint(mouse_pos) and mouse_click:
             return name1, name2, bg_files[selected_bg_index]
+        
+        if quit_rect.collidepoint(mouse_pos) and mouse_click:
+            pygame.quit()
+            sys.exit()
 
         blit_scaled(real, screen)
         pygame.display.flip()

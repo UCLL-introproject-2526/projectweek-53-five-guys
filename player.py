@@ -685,7 +685,7 @@ class Player:
         self.respawn_y = 290
         self.active_powerups = []
         self.equiped_weapon = None
-        self.blood_img = pygame.image.load("assets/blood.png").convert_alpha()
+        self.blood_img = pygame.image.load("assets/items/blood.png").convert_alpha()
         self.blood_img = pygame.transform.scale(self.blood_img, (80, 80))
         self.blood_splashes = []
         self.facing = "RIGHT"
@@ -753,7 +753,7 @@ class Player:
             f"{base}/movement_falling.png"
         ).convert_alpha()
         self.heart_img = pygame.transform.scale(
-            (pygame.image.load("assets/heart_full.png").convert_alpha()), (60, 60)
+            (pygame.image.load("assets/items/heart_full.png").convert_alpha()), (60, 60)
         )
         self.death_img = pygame.transform.scale(
             pygame.image.load(f"assets/player_{player}/death.png").convert_alpha(),
