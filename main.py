@@ -21,18 +21,18 @@ async def main():
     virtual = pygame.Surface(VIRTUAL_SIZE)
     clock = pygame.time.Clock()
 
-    while True:  # RESTART LOOP for the end page to restart
-        player1_name, player2_name = startpage(virtual, screen)
+    while True:
+        player1_name, player2_name, background_img = startpage(virtual, screen)
 
         player1 = Player(1)
         player2 = Player(2)
 
-        background = pygame.image.load("assets/background2.png").convert()
+        background = pygame.image.load(background_img).convert()
         background = pygame.transform.scale(
             background, (VIRTUAL_SIZE[0], VIRTUAL_SIZE[1])
         )
 
-        game_quit_img = pygame.image.load("assets/button/quit2.png").convert_alpha()
+        game_quit_img = pygame.image.load("assets/button/quit_game.png").convert_alpha()
         game_quit_img = pygame.transform.scale(game_quit_img, (220, 70))
         game_quit_rect = game_quit_img.get_rect(bottomleft=(30, VIRTUAL_SIZE[1] - 30))
 

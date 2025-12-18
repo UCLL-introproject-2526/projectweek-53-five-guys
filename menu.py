@@ -2,140 +2,79 @@ import pygame
 import sys
 
 VIRTUAL_SIZE = (1920, 1080)
-
-GAME_PLAYING = "playing"
-GAME_END = "end"
-
-game_state = GAME_PLAYING
 clock = pygame.time.Clock()
 
 
 def startpage(screen, real):
-    clock.tick(120)
-    screen_w, screen_h = (1920, 1080)
-    right_x = int(screen_w * 0.75)
+    screen_w, screen_h = VIRTUAL_SIZE
 
-    name1 = "Player1 : "
-    name2 = "Player2 : "
+    name1, name2 = "Player 1", "Player 2"
     active_box = None
 
-    input_font = pygame.font.Font("assets/font/Kaijuz.ttf", 24)
+    selected_bg_index = 0
+    bg_files = [
+        "assets/backgrounds/background.png",
+        "assets/backgrounds/background2.png",
+        "assets/backgrounds/background3.png",
+    ]
 
-    title_img = pygame.image.load("assets/logo.png").convert_alpha()
-    title_img = pygame.transform.scale(title_img, (700, 380))
+    input_font = pygame.font.Font("assets/font/PressStart2P-Regular.ttf", 24)
+    # to use later
+    title_font = pygame.font.Font("assets/font/PressStart2P-Regular.ttf", 32)
 
-    menu_bg = pygame.image.load("assets/background.png").convert_alpha()
-    menu_bg = pygame.transform.scale(menu_bg, screen.get_size())
-    menu_bg.set_alpha(200)
-
-    start_img = pygame.image.load("assets/button/play.png").convert_alpha()
-    quit_img = pygame.image.load("assets/button/quit.png").convert_alpha()
-
-    start_img = pygame.transform.scale(start_img, (360, 75))
-    quit_img = pygame.transform.scale(quit_img, (360, 75))
-
-    start_rect = start_img.get_rect(topleft=(1400, 400))
-    quit_rect = quit_img.get_rect(topleft=(1400, 520))
-
-    base_y = screen_h // 2 + 40
-    gap = 120
-
-    start_rect = start_img.get_rect(center=(right_x, base_y))
-    quit_rect = quit_img.get_rect(center=(right_x, base_y + gap))
-
+    character_width, charcter_height = 400, 409
     char1_img = pygame.image.load(
         "assets/character/player_1_poster_choosing.png"
     ).convert_alpha()
     char2_img = pygame.image.load(
         "assets/character/player_2_poster_choosing.png"
     ).convert_alpha()
+    char1_img = pygame.transform.smoothscale(
+        char1_img, (character_width, charcter_height)
+    )
+    char2_img = pygame.transform.smoothscale(
+        char2_img, (character_width, charcter_height)
+    )
 
-    char1_img = pygame.transform.scale(char1_img, (240, 340))
-    char2_img = pygame.transform.scale(char2_img, (240, 340))
-
-    left_center_x = screen_w * 0.25
-    char_center_y = screen_h * 0.52
-    char_gap = 40
-
+    character_between_gap = 650
     char1_rect = char1_img.get_rect(
-        center=(
-            left_center_x - char1_img.get_width() // 2 - char_gap // 2,
-            char_center_y,
-        )
+        center=(screen_w // 2 - character_between_gap, screen_h // 2 + 100)
     )
     char2_rect = char2_img.get_rect(
-        center=(
-            left_center_x + char2_img.get_width() // 2 + char_gap // 2,
-            char_center_y,
-        )
+        center=(screen_w // 2 + character_between_gap, screen_h // 2 + 100)
     )
 
-    box_width = 180
-    box_height = 32
-    box_gap = 14
+    box1_rect = pygame.Rect(char1_rect.centerx - 150, char1_rect.bottom + 10, 300, 50)
+    box2_rect = pygame.Rect(char2_rect.centerx - 150, char2_rect.bottom + 10, 300, 50)
 
-    box1_rect = pygame.Rect(
-        char1_rect.centerx - box_width // 2,
-        char1_rect.bottom + box_gap,
-        box_width,
-        box_height,
+    bg_thumbnails = []
+    bg_rects = []
+    for i, path in enumerate(bg_files):
+        img = pygame.image.load(path).convert_alpha()
+        bg_thumbnails.append(pygame.transform.smoothscale(img, (200, 110)))
+        rect = pygame.Rect(0, 0, 200, 110)
+        rect.center = (screen_w // 2, char1_rect.top + 220 + (i * 140))
+        bg_rects.append(rect)
+
+    start_img = pygame.transform.scale(
+        pygame.image.load("assets/button/start_game.png").convert_alpha(), (360, 150)
     )
-
-    box2_rect = pygame.Rect(
-        char2_rect.centerx - box_width // 2,
-        char2_rect.bottom + box_gap,
-        box_width,
-        box_height,
-    )
-
-    left_center_x = screen_w * 0.25
-    char_center_y = screen_h * 0.52
-    char_gap = 40
-
-    char1_rect = char1_img.get_rect(
-        center=(
-            left_center_x - char1_img.get_width() // 2 - char_gap // 2,
-            char_center_y,
-        )
-    )
-
-    char2_rect = char2_img.get_rect(
-        center=(
-            left_center_x + char2_img.get_width() // 2 + char_gap // 2,
-            char_center_y,
-        )
-    )
-
-    title_font = pygame.font.Font("assets/font/Attack_Of_Monster.ttf", 36)
-
-    title_text = title_font.render("CHOOSE YOUR CHARACTER", True, (255, 255, 255))
-
-    title_rect = title_text.get_rect(center=(screen_w * 0.25, screen_h * 0.25))
-
-    panel_padding = 25
-
-    panel_left = char1_rect.left - panel_padding
-    panel_top = title_rect.top - panel_padding
-    panel_right = char2_rect.right + panel_padding
-    panel_bottom = box1_rect.bottom + panel_padding
-
-    panel_rect = pygame.Rect(
-        panel_left, panel_top, panel_right - panel_left, panel_bottom - panel_top
-    )
-
-    error_message = ""
-    error_font = pygame.font.Font("assets/font/Kaijuz.ttf", 24)
-
-    title_img_rect = title_img.get_rect(center=(right_x, 200))
+    start_rect = start_img.get_rect(center=(screen_w // 2, char1_rect.top - 50))
 
     while True:
+        mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), real)
+        mouse_click = pygame.mouse.get_pressed()[0]
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), real)
+                for i, r in enumerate(bg_rects):
+                    if r.collidepoint(mouse_pos):
+                        selected_bg_index = i
+
                 if box1_rect.collidepoint(mouse_pos):
                     active_box = 1
                 elif box2_rect.collidepoint(mouse_pos):
@@ -143,108 +82,55 @@ def startpage(screen, real):
                 else:
                     active_box = None
 
-            if event.type == pygame.KEYDOWN:
-                if active_box == 1:
-                    if event.key == pygame.K_BACKSPACE:
+            if event.type == pygame.KEYDOWN and active_box:
+                if event.key == pygame.K_BACKSPACE:
+                    if active_box == 1:
                         name1 = name1[:-1]
                     else:
-                        name1 += event.unicode
-
-                elif active_box == 2:
-                    if event.key == pygame.K_BACKSPACE:
                         name2 = name2[:-1]
+                else:
+                    if active_box == 1:
+                        name1 += event.unicode
                     else:
                         name2 += event.unicode
 
-        screen.fill((0, 0, 0))
+        bg_preview = pygame.image.load(bg_files[selected_bg_index]).convert()
+        bg_preview = pygame.transform.scale(bg_preview, VIRTUAL_SIZE)
+        bg_preview.set_alpha(150)
+        screen.blit(bg_preview, (0, 0))
 
-        screen.blit(menu_bg, (0, 0))
-
-        fade = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-        fade.fill((0, 0, 0, 150))
-        screen.blit(fade, (0, 0))
-
-        pygame.draw.rect(screen, (255, 255, 255), box1_rect, 2)
-        pygame.draw.rect(screen, (255, 255, 255), box2_rect, 2)
-
-        if active_box == 1:
-            pygame.draw.rect(screen, (0, 150, 255), box1_rect, 2)
-        if active_box == 2:
-            pygame.draw.rect(screen, (0, 150, 255), box2_rect, 2)
-
-        name1_surf = input_font.render(name1, True, (255, 255, 255))
-        name2_surf = input_font.render(name2, True, (255, 255, 255))
-
-        screen.blit(name1_surf, (box1_rect.x + 8, box1_rect.y + 6))
-        screen.blit(name2_surf, (box2_rect.x + 8, box2_rect.y + 6))
-
-        mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), real)
-        mouse_click = pygame.mouse.get_pressed()[0]
-
-        if start_rect.collidepoint(mouse_pos):
-            hover_img = pygame.transform.scale(
-                start_img, (int(start_rect.width * 1.1), int(start_rect.height * 1.1))
-            )
-            hover_rect = hover_img.get_rect(center=start_rect.center)
-            screen.blit(hover_img, hover_rect)
-
-            if mouse_click:
-                if name1 != "" and name2 != "":
-                    return name1, name2
-                else:
-                    error_message = "Input your Name to play"
-        else:
-            screen.blit(start_img, start_rect)
-
-        # panel_surface = pygame.Surface(panel_rect.size, pygame.SRCALPHA)
-        # panel_surface.fill((20, 20, 20, 180))
-        # screen.blit(panel_surface, panel_rect.topleft)
-
-        screen.blit(title_img, title_img_rect)
-
-        if quit_rect.collidepoint(mouse_pos):
-            hover_img = pygame.transform.scale(
-                quit_img, (int(quit_rect.width * 1.1), int(quit_rect.height * 1.1))
-            )
-
-            hover_rect = hover_img.get_rect(center=quit_rect.center)
-
-            screen.blit(hover_img, hover_rect)
-
-            if mouse_click:
-                pygame.quit()
-                sys.exit()
-        else:
-            screen.blit(quit_img, quit_rect)
-
-        panel_surface = pygame.Surface(panel_rect.size, pygame.SRCALPHA)
-
-        pygame.draw.rect(
-            panel_surface, (15, 15, 15, 220), panel_surface.get_rect(), border_radius=60
+        bg_choice_title = input_font.render("SELECT BACKGROUND", True, (255, 255, 255))
+        screen.blit(
+            bg_choice_title,
+            bg_choice_title.get_rect(center=(screen_w // 2, char1_rect.top + 140)),
         )
-
-        border_surface = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-
-        pygame.draw.rect(
-            border_surface, (255, 255, 255, 200), border_surface.get_rect(), 20
-        )
-
-        pygame.draw.rect(screen, (255, 255, 255, 120), panel_rect, 2, border_radius=30)
-
-        screen.blit(border_surface, (0, 0))
-
-        if error_message != "":
-            error_surf = error_font.render(error_message, True, (255, 80, 80))
-            error_rect = error_surf.get_rect(center=(screen_w // 2, screen_h * 0.85))
-
-            screen.blit(error_surf, error_rect)
-
-        screen.blit(panel_surface, panel_rect.topleft)
-
-        screen.blit(title_text, title_rect)
+        for i, r in enumerate(bg_rects):
+            screen.blit(bg_thumbnails[i], r.topleft)
+            if i == selected_bg_index:
+                pygame.draw.rect(screen, (0, 255, 255), r, 4)
 
         screen.blit(char1_img, char1_rect)
         screen.blit(char2_img, char2_rect)
+
+        n1_surf = input_font.render(
+            name1, True, (0, 255, 255) if active_box == 1 else (255, 255, 255)
+        )
+        n2_surf = input_font.render(
+            name2, True, (0, 255, 255) if active_box == 2 else (255, 255, 255)
+        )
+        screen.blit(
+            n1_surf,
+            n1_surf.get_rect(center=(char1_rect.centerx, char1_rect.bottom + 40)),
+        )
+        screen.blit(
+            n2_surf,
+            n2_surf.get_rect(center=(char2_rect.centerx, char2_rect.bottom + 40)),
+        )
+
+        screen.blit(start_img, start_rect)
+
+        if start_rect.collidepoint(mouse_pos) and mouse_click:
+            return name1, name2, bg_files[selected_bg_index]
 
         blit_scaled(real, screen)
         pygame.display.flip()
@@ -253,15 +139,9 @@ def startpage(screen, real):
 def blit_scaled(screen, virtual):
     win_w, win_h = screen.get_size()
     scale = min(win_w / VIRTUAL_SIZE[0], win_h / VIRTUAL_SIZE[1])
-
-    scaled_w = int(VIRTUAL_SIZE[0] * scale)
-    scaled_h = int(VIRTUAL_SIZE[1] * scale)
-
+    scaled_w, scaled_h = int(VIRTUAL_SIZE[0] * scale), int(VIRTUAL_SIZE[1] * scale)
     scaled = pygame.transform.smoothscale(virtual, (scaled_w, scaled_h))
-
-    x = (win_w - scaled_w) // 2
-    y = (win_h - scaled_h) // 2
-
+    x, y = (win_w - scaled_w) // 2, (win_h - scaled_h) // 2
     screen.fill((0, 0, 0))
     screen.blit(scaled, (x, y))
 
@@ -269,14 +149,8 @@ def blit_scaled(screen, virtual):
 def screen_to_virtual(mouse_pos, screen):
     win_w, win_h = screen.get_size()
     scale = min(win_w / VIRTUAL_SIZE[0], win_h / VIRTUAL_SIZE[1])
+    scaled_w, scaled_h = int(VIRTUAL_SIZE[0] * scale), int(VIRTUAL_SIZE[1] * scale)
+    ox, oy = (win_w - scaled_w) // 2, (win_h - scaled_h) // 2
 
-    scaled_w = int(VIRTUAL_SIZE[0] * scale)
-    scaled_h = int(VIRTUAL_SIZE[1] * scale)
+    return int((mouse_pos[0] - ox) / scale), int((mouse_pos[1] - oy) / scale)
 
-    offset_x = (win_w - scaled_w) // 2
-    offset_y = (win_h - scaled_h) // 2
-
-    vx = (mouse_pos[0] - offset_x) / scale
-    vy = (mouse_pos[1] - offset_y) / scale
-
-    return int(vx), int(vy)
