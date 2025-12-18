@@ -643,6 +643,7 @@ class Player:
             return
         if now_ms - self.last_dash_at < self.dash_cooldown_ms:
             return
+        self.audio_logic("dash")
         self.is_dashing = True
         self.dash_until = now_ms + self.dash_duration_ms
         self.last_dash_at = now_ms
