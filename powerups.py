@@ -43,6 +43,14 @@ class PowerUp(ABC):
             if now - self.landed_time >= self.stay_duration:
                 self.state = "USED"
 
+    def audio_logic(self, audioName):
+        try:
+            sfx = pygame.mixer.Sound(f"assets/audio/{audioName}.wav")
+            sfx.set_volume(1.0)
+            sfx.play()
+        except pygame.error:
+            pass
+
     def draw(self, screen):
         if self.state != "USED":
             screen.blit(self.image, (self.x, self.y))
@@ -69,7 +77,7 @@ class PowerUp(ABC):
 class SpeedBoost(PowerUp):
     def __init__(self):
         self.boost_amount = 15
-        self.duration = 8000  # 8 seconds
+        self.duration = 8000
         self.start_time = 0
         self.x = random.randint(50, 1920 - 50)
 
@@ -85,14 +93,6 @@ class SpeedBoost(PowerUp):
         player.active_powerups.append((self, pygame.time.get_ticks()))
         player.speed += self.boost_amount
 
-    def audio_logic(self, audioName):
-        try:
-            sfx = pygame.mixer.Sound(f"assets/audio/{audioName}.wav")
-            sfx.set_volume(1.0)
-            sfx.play()
-        except pygame.error:
-            pass
-
 
 class Heart(PowerUp):
     def __init__(self):
@@ -107,6 +107,26 @@ class Heart(PowerUp):
     def apply(self, player):
         self.state = "USED"
         player.lives += self.heal_amount
+
+
+class Shield(PowerUp):
+    def __init__(self):
+        self.x = random.randint(50, 1920 - 50)
+        self.hits = 2
+        self.start_time = 0
+        self.duration = 8000  # 8 seconds the shield lasts
+
+    @property
+    def image(self):
+        img = pygame.image.load("assets/items/shield_item.png").convert_alpha()
+        return pygame.transform.scale(img, (self.size, self.size))
+
+    def apply(self, player):
+        self.audio_logic("itemReceive")
+        self.state = "USED"
+        self.start_time = pygame.time.get_ticks()
+        player.active_powerups.append((self, pygame.time.get_ticks()))
+        player.shield_active = True
 
 
 class Katana(PowerUp):
@@ -140,14 +160,13 @@ class Grenade:
         self.x = random.randint(200, 1720)
         self.y = -self.size
         self.vy = 0
-        self.fall_speed = 4  
-        self.state = "FALLING"  
-        self.max_durability = 1  
+        self.fall_speed = 4
+        self.state = "FALLING"
+        self.max_durability = 1
         self.durability = 1
         self.landed_time = 0
         self.stay_duration = 6000
 
-        
         try:
             self.grenade_img = pygame.transform.scale(
                 pygame.image.load("assets/items/grenade/grenade.png").convert_alpha(),
@@ -155,10 +174,12 @@ class Grenade:
             )
             self.explosion_imgs = [
                 pygame.transform.scale(
-                    pygame.image.load(f"assets/items/grenade/bomb_{i}.png").convert_alpha(),
+                    pygame.image.load(
+                        f"assets/items/grenade/bomb_{i}.png"
+                    ).convert_alpha(),
                     (100, 100),
                 )
-                for i in range(1, 4)  
+                for i in range(1, 4)
             ]
             self.images = {
                 "grenade": self.grenade_img,

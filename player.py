@@ -2,7 +2,7 @@ import pygame
 import time
 import math
 import random
-from powerups import Katana, SpeedBoost, Grenade
+from powerups import Katana, SpeedBoost, Grenade, Shield
 from throwables import ThrownKatana, ThrownGrenade
 
 
@@ -36,6 +36,11 @@ class Player:
                     break
                 else:
                     self.speed += 12
+            if isinstance(powerup, Shield):
+                if ratio > powerup.duration:
+                    self.active_powerups.remove(p)
+                    self.shield_active = False
+                    break
 
         if self.is_dashing and not self.dead:
             dx = self.dash_speed if self.facing == "RIGHT" else -self.dash_speed
@@ -282,12 +287,17 @@ class Player:
         self.hit_from = hit_from
         self.got_hit = True
 
-        if isinstance(weapon, Katana):
-            self.health -= 33.5
-        if hit_by_throw and isinstance(weapon, Grenade):
-            self.health -= 50.0
+        if self.shield_active:
+            resist = 0.7
         else:
-            self.health -= 10
+            resist = 1
+
+        if isinstance(weapon, Katana):
+            self.health -= 33.5 * resist
+        if hit_by_throw and isinstance(weapon, Grenade):
+            self.health -= 50.0 * resist
+        else:
+            self.health -= 10 * resist
 
     def punched(self):
         now = pygame.time.get_ticks()
@@ -492,6 +502,11 @@ class Player:
                 else:
                     screen.blit(self.death_img, (self.x, self.y))
             elif opponent_dead:
+                if self.shield_active:
+                    orb_x = self.x - 63
+                    orb_y = self.y - 54
+                    orb_img = self.shield_orb_img
+                    screen.blit(orb_img, (orb_x, orb_y))
                 screen.blit(self.victory_img, (self.x, self.y))
             else:
                 screen.blit(self.current_img, (self.x, self.y))
@@ -523,6 +538,12 @@ class Player:
                     )
                     offset = right_off if self.facing == "RIGHT" else left_off
                     screen.blit(katana_img, offset)
+
+                if self.shield_active:
+                    orb_x = self.x - 63
+                    orb_y = self.y - 54
+                    orb_img = self.shield_orb_img
+                    screen.blit(orb_img, (orb_x, orb_y))
 
     def draw_hearts(self, screen):
         start_y = 20
@@ -786,6 +807,7 @@ class Player:
         self.block_until = 0
         self.thrown_projectiles = []
         self.dash_hit_done = False
+        self.shield_active = False
 
         self.block_left = pygame.transform.scale(
             pygame.image.load(
@@ -925,3 +947,13 @@ class Player:
             ).convert_alpha(),
             (self.w, self.h),
         )
+        self.shield_orb_img = pygame.transform.scale(
+            pygame.image.load("assets/items/shield_orb.png").convert_alpha(),
+            (self.w + 120, self.h + 120),
+        )
+        self.shield_orb_cracked_img = pygame.transform.scale(
+            pygame.image.load("assets/items/shield_orb_cracked.png").convert_alpha(),
+            (self.w + 120, self.h + 120),
+        )
+        self.shield_orb_img.set_alpha(120)  # 0–255 (lower = more transparent)
+        self.shield_orb_cracked_img.set_alpha(120)

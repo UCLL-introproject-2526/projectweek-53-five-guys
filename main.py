@@ -5,7 +5,7 @@ from platforms import Platform
 from player import Player
 from menu import startpage
 from menu import screen_to_virtual
-from powerups import SpeedBoost, Heart, Katana, Grenade
+from powerups import SpeedBoost, Heart, Katana, Grenade, Shield
 from end_page import EndPage
 import sys
 
@@ -14,20 +14,20 @@ VIRTUAL_SIZE = (1920, 1080)
 
 
 async def main():
-    pygame.mixer.init()
+    # pygame.mixer.init()
     pygame.init()
 
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     virtual = pygame.Surface(VIRTUAL_SIZE)
     clock = pygame.time.Clock()
 
-    pygame.mixer.music.load("assets/audio/background_menu_song.wav")
-    pygame.mixer.music.play(-1)
+    # pygame.mixer.music.load("assets/audio/background_menu_song.wav")
+    # pygame.mixer.music.play(-1)
 
     while True:
         player1_name, player2_name, background_img = startpage(virtual, screen)
 
-        pygame.mixer.music.stop()
+        # pygame.mixer.music.stop()
 
         player1 = Player(1)
         player2 = Player(2)
@@ -49,12 +49,14 @@ async def main():
         heart = None
         katana = None
         grenade = None
+        shield = None
         POWERUP_POOL = [
-            (None, 0),
+            (None, 0.4),
             ("SPEED_BOOST", 0.2),
-            ("HEART", 0.07),
+            ("SHIELD", 0.15),
+            ("HEART", 0.15),
             ("KATANA", 0.25),
-            ("GRENADE", 0.5),
+            ("GRENADE", 0.25),
         ]
         ITEM_SPAWN_EVENT = pygame.USEREVENT + 1
         pygame.time.set_timer(ITEM_SPAWN_EVENT, 1000)
@@ -84,6 +86,7 @@ async def main():
                         None: True,
                         "SPEED_BOOST": speed_boost is None
                         or speed_boost.state == "USED",
+                        "SHIELD": shield is None or shield.state == "USED",
                         "HEART": heart is None or heart.state == "USED",
                         "KATANA": katana is None or katana.state == "USED",
                         "GRENADE": grenade is None or grenade.state == "USED",
@@ -108,6 +111,8 @@ async def main():
                             pass
                         case "SPEED_BOOST":
                             speed_boost = SpeedBoost()
+                        case "SHIELD":
+                            shield = Shield()
                         case "HEART":
                             heart = Heart()
                         case "KATANA":
@@ -290,6 +295,16 @@ async def main():
 
                 if speed_boost.state == "USED":
                     speed_boost = None
+
+            if shield:
+                shield.update(platforms)
+                shield.draw(virtual)
+
+                shield.check_collision(player1)
+                shield.check_collision(player2)
+
+                if shield.state == "USED":
+                    shield = None
 
             if grenade:
                 grenade.update(platforms)

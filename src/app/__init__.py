@@ -4,8 +4,18 @@ from .platforms import Platform
 from .player import Player
 from .menu import startpage
 from .menu import screen_to_virtual
+<<<<<<< HEAD
 from .powerups import SpeedBoost, Heart
 
+||||||| 8b6e555
+from .powerups import SpeedBoost, Heart
+
+
+=======
+from .powerups import SpeedBoost, Heart, Shield
+import random
+
+>>>>>>> origin/shield-item
 VIRTUAL_SIZE = (1920, 1080)
 
 def main():
@@ -36,14 +46,33 @@ def main():
     name_font = pygame.font.Font("assets/font/PressStart2P-Regular.ttf", 36)
     p1_name_surf = name_font.render(player1_name, True, (255, 255, 255))
     p2_name_surf = name_font.render(player2_name, True, (255, 255, 255))
+<<<<<<< HEAD
     
+||||||| 8b6e555
+=======
+
+
+>>>>>>> origin/shield-item
     speed_boost = None
     BOOST_EVENT = pygame.USEREVENT + 1
     pygame.time.set_timer(BOOST_EVENT, 13000)
 
     heart = None
     HEART_EVENT = pygame.USEREVENT + 2
+<<<<<<< HEAD
     pygame.time.set_timer(HEART_EVENT, 20000)
+||||||| 8b6e555
+    pygame.time.set_timer(
+        HEART_EVENT, 20000
+    )  # spawn every 20 seconds (adjust as you like)
+=======
+    pygame.time.set_timer(HEART_EVENT, 20000)  # spawn every 20 seconds 
+
+    shield = None
+    SHIELD_EVENT = pygame.USEREVENT + 1
+    pygame.time.set_timer(BOOST_EVENT, 12000) 
+
+>>>>>>> origin/shield-item
 
     platforms = [
         Platform(280, 420, 470, 73, True),
@@ -68,6 +97,11 @@ def main():
             if event.type == HEART_EVENT and heart is None:
                 if random.random() <= 0.3:
                     heart = Heart()
+            if event.type == SHIELD_EVENT and shield is None:
+                if random.random() < 0.35:  # 35% chance
+                    shield = Shield()
+
+            
 
         player1.core_logic(platforms, events)
         player2.core_logic(platforms, events)
@@ -124,6 +158,45 @@ def main():
         if game_quit_rect.collidepoint(mouse_pos) and mouse_click:
             running = False
 
+<<<<<<< HEAD
+||||||| 8b6e555
+        if heart:
+            heart.update(platforms)  # falls down / lands on platforms
+            heart.draw(virtual)  # draw the heart
+
+            heart.check_collision(player1)
+            heart.check_collision(player2)
+
+            # Remove heart if collected or expired
+            if heart.state == "USED":
+                heart = None
+
+=======
+        if heart:
+            heart.update(platforms)  # falls down / lands on platforms
+            heart.draw(virtual)  # draw the heart
+
+            heart.check_collision(player1)
+            heart.check_collision(player2)
+
+            # Remove heart if collected or expired
+            if heart.state == "USED":
+                heart = None
+
+        
+        if shield:
+            shield.update(platforms)  # falls down / lands on platforms
+            shield.draw(virtual)  # draw the heart
+
+            shield.check_collision(player1)
+            shield.check_collision(player2)
+
+            # Remove heart if collected or expired
+            if shield.state == "USED":
+                shield = None
+   
+
+>>>>>>> origin/shield-item
         blit_scaled(screen, virtual)
         pygame.display.flip()
 
