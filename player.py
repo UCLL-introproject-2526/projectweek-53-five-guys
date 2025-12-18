@@ -3,6 +3,7 @@ import time
 import math
 import random
 from powerups import Katana, SpeedBoost
+from throwables import ThrownKatana
 
 
 PUNCH_WIDTH = 120
@@ -102,6 +103,8 @@ class Player:
                     self.start_dash(now_ms)
                 if event.key == self.key_block:
                     self.block()
+                if event.key == self.key_throw:
+                    self.throw()
 
         for p in self.punches:
             now = pygame.time.get_ticks()
@@ -319,6 +322,19 @@ class Player:
         self.current_img = (
             self.block_left if self.facing == "LEFT" else self.block_right
         )
+
+    def throw(self):
+        if self.equiped_weapon is None:
+            return
+
+        if isinstance(self.equiped_weapon, Katana):
+            start_x = self.x + (
+                self.w if self.facing == "RIGHT" else -self.equiped_weapon.size
+            )
+            start_y = self.y + int(0.35 * self.h)
+            proj = ThrownKatana(start_x, start_y, self.facing, self.equiped_weapon)
+            self.thrown_projectiles.append(proj)
+            self.equiped_weapon = None
 
     def update_animation(self, moving_left, moving_right):
         if self.is_dashing:
@@ -630,6 +646,7 @@ class Player:
         self.health = 100
         self.active_powerups = []
         self.equiped_weapon = None
+        self.thrown_projectiles = []
 
         self.dead = False
 
@@ -709,6 +726,8 @@ class Player:
         self.is_blocking = False
         self.block_duration = 400
         self.block_until = 0
+        self.thrown_projectiles = []
+        self.dash_hit_done = False
 
         self.block_left = pygame.transform.scale(
             pygame.image.load(
@@ -725,6 +744,7 @@ class Player:
             self.key_punch = pygame.K_e
             self.key_dash = pygame.K_r
             self.key_block = pygame.K_q
+            self.key_throw = pygame.K_t
             self.x = 550
             self.respawn_x = 550
             self.y = 400
@@ -739,6 +759,7 @@ class Player:
             self.key_punch = pygame.K_m
             self.key_dash = pygame.K_n
             self.key_block = pygame.K_COMMA
+            self.key_throw = pygame.K_b
             self.x = 1470
             self.respawn_x = 1470
             self.y = 400

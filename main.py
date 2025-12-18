@@ -150,6 +150,65 @@ async def main():
                     player1.hit(player2.facing, p[3])
                     player2.punches.remove(p)
 
+            if not hasattr(player1, "dash_hit_done"):
+                player1.dash_hit_done = False
+            if not hasattr(player2, "dash_hit_done"):
+                player2.dash_hit_done = False
+            if not player1.is_dashing:
+                player1.dash_hit_done = False
+            if not player2.is_dashing:
+                player2.dash_hit_done = False
+
+            if (
+                player1.is_dashing
+                and isinstance(player1.equiped_weapon, Katana)
+                and not player1.dash_hit_done
+                and player1.rects_overlap(
+                    player1.x,
+                    player1.y,
+                    player1.w,
+                    player1.h,
+                    player2.x,
+                    player2.y,
+                    player2.w,
+                    player2.h,
+                )
+            ):
+                player2.hit(player1.facing, player1.equiped_weapon)
+                player1.dash_hit_done = True
+
+            if (
+                player2.is_dashing
+                and isinstance(player2.equiped_weapon, Katana)
+                and not player2.dash_hit_done
+                and player2.rects_overlap(
+                    player2.x,
+                    player2.y,
+                    player2.w,
+                    player2.h,
+                    player1.x,
+                    player1.y,
+                    player1.w,
+                    player1.h,
+                )
+            ):
+                player1.hit(player2.facing, player2.equiped_weapon)
+                player2.dash_hit_done = True
+
+            for proj in list(player1.thrown_projectiles):
+                proj.update(platforms)
+                proj.draw(virtual)
+                proj.check_collision(player2)
+                if proj.state == "USED":
+                    player1.thrown_projectiles.remove(proj)
+
+            for proj in list(player2.thrown_projectiles):
+                proj.update(platforms)
+                proj.draw(virtual)
+                proj.check_collision(player1)
+                if proj.state == "USED":
+                    player2.thrown_projectiles.remove(proj)
+
             player1.check_death(VIRTUAL_SIZE[1])
             player2.check_death(VIRTUAL_SIZE[1])
 
