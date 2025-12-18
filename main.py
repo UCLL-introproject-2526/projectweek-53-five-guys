@@ -5,7 +5,7 @@ from platforms import Platform
 from player import Player
 from menu import startpage
 from menu import screen_to_virtual
-from powerups import SpeedBoost, Heart, Katana
+from powerups import SpeedBoost, Heart, Katana, Grenade
 from end_page import EndPage
 import sys
 
@@ -43,11 +43,13 @@ async def main():
         speed_boost = None
         heart = None
         katana = None
-        powerups = [
-            (None, 0.8),
-            ("SPEED_BOOST", 0.1),
+        grenade = None
+        POWERUP_POOL = [
+            (None, 0),
+            ("SPEED_BOOST", 0.2),
             ("HEART", 0.07),
-            ("KATANA", 0.03),
+            ("KATANA", 0.25),
+            ("GRENADE", 0.5)
         ]
         ITEM_SPAWN_EVENT = pygame.USEREVENT + 1
         pygame.time.set_timer(ITEM_SPAWN_EVENT, 1000)
@@ -72,28 +74,26 @@ async def main():
             for event in events:
                 if event.type == pygame.QUIT:
                     running = False
-                if event.type == ITEM_SPAWN_EVENT and speed_boost is None:
+                if event.type == ITEM_SPAWN_EVENT:
                     check = {
                         None: True,
-                        "SPEED_BOOST": speed_boost == None,
-                        "HEART": heart == None,
-                        "KATANA": katana == None,
+                        "SPEED_BOOST": speed_boost is None or speed_boost.state == "USED",
+                        "HEART": heart is None or heart.state == "USED",
+                        "KATANA": katana is None or katana.state == "USED",
+                        "GRENADE": grenade is None or grenade.state == "USED",
                     }
-                    powerups = [p for p in powerups if check[p[0]]]
+                    available = [p for p in POWERUP_POOL if check[p[0]]]
 
-                    cum = 0.0
-                    for p in powerups:
-                        cum += p[1]
+                    cum = sum(p[1] for p in available)
                     if cum < 1.0:
-                        powerups.append((None, 1.0 - cum))
+                        available.append((None, 1.0 - cum))
 
                     r = random.random()
-                    cum = 0.0
+                    acc = 0.0
                     result = None
-
-                    for outcome, p in powerups:
-                        cum += p
-                        if r < cum:
+                    for outcome, prob in available:
+                        acc += prob
+                        if r < acc:
                             result = outcome
                             break
 
@@ -106,6 +106,8 @@ async def main():
                             heart = Heart()
                         case "KATANA":
                             katana = Katana()
+                        case "GRENADE":
+                            grenade = Grenade()
 
             mouse_click = any(
                 event.type == pygame.MOUSEBUTTONDOWN and event.button == 1
@@ -278,6 +280,16 @@ async def main():
 
                 if speed_boost.state == "USED":
                     speed_boost = None
+
+            if grenade:
+                grenade.update(platforms)
+                grenade.draw(virtual)
+
+                grenade.check_collision(player1)
+                grenade.check_collision(player2)
+
+                if grenade.state == "USED":
+                    grenade = None
 
             virtual.blit(p1_name_surf, (40, 104))
             virtual.blit(p2_name_surf, (VIRTUAL_SIZE[0] - 320, 104))

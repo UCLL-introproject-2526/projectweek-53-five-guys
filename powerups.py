@@ -132,3 +132,84 @@ class Katana(PowerUp):
     def apply(self, player):
         self.state = "USED"
         player.equiped_weapon = self
+
+
+class Grenade:
+    def __init__(self):
+        self.size = 40
+        self.x = random.randint(200, 1720)
+        self.y = -self.size
+        self.vy = 0
+        self.fall_speed = 4  
+        self.state = "FALLING"  
+        self.max_durability = 1  
+        self.durability = 1
+        self.landed_time = 0
+        self.stay_duration = 6000
+
+        
+        try:
+            self.grenade_img = pygame.transform.scale(
+                pygame.image.load("assets/items/grenade/grenade.png").convert_alpha(),
+                (self.size, self.size),
+            )
+            self.explosion_imgs = [
+                pygame.transform.scale(
+                    pygame.image.load(f"assets/items/grenade/bomb_{i}.png").convert_alpha(),
+                    (100, 100),
+                )
+                for i in range(1, 4)  
+            ]
+            self.images = {
+                "grenade": self.grenade_img,
+                "explosion": self.explosion_imgs,
+            }
+        except pygame.error as e:
+            print(f"Error loading grenade images: {e}")
+            raise
+
+    @property
+    def image(self):
+        return self.grenade_img
+
+    def update(self, platforms):
+        if self.state == "FALLING":
+            self.y += self.fall_speed
+
+            if self.y >= 1080:
+                self.state = "USED"
+                return
+
+            for p in platforms:
+                if (
+                    self.x + self.size > p.x
+                    and self.x < p.x + p.w
+                    and self.y + self.size >= p.y
+                ):
+                    self.y = p.y - self.size - 8
+                    self.state = "ON_PLATFORM"
+                    self.landed_time = pygame.time.get_ticks()
+                    break
+
+        elif self.state == "ON_PLATFORM":
+            now = pygame.time.get_ticks()
+            if now - self.landed_time >= self.stay_duration:
+                self.state = "USED"
+
+    def draw(self, screen):
+        if self.state != "USED":
+            screen.blit(self.grenade_img, (self.x, self.y))
+
+    def check_collision(self, player):
+        if self.state == "USED":
+            return
+
+        hit = not (
+            player.x + player.w <= self.x
+            or player.x >= self.x + self.size
+            or player.y + player.h <= self.y
+            or player.y >= self.y + self.size
+        )
+        if hit:
+            player.equiped_weapon = self
+            self.state = "USED"

@@ -2,8 +2,8 @@ import pygame
 import time
 import math
 import random
-from powerups import Katana, SpeedBoost
-from throwables import ThrownKatana
+from powerups import Katana, SpeedBoost, Grenade
+from throwables import ThrownKatana, ThrownGrenade
 
 
 PUNCH_WIDTH = 120
@@ -241,20 +241,13 @@ class Player:
         self.hit_on = pygame.time.get_ticks()
         self.hit_from = hit_from
         self.got_hit = True
+        
         if isinstance(weapon, Katana):
             self.health -= 50
-
-            num_splashes = random.randint(3, 5)
-            for _ in range(num_splashes):
-                splash_x = self.x + random.randint(int(0.1 * self.w), int(0.9 * self.w))
-                splash_y = self.y + random.randint(int(0.1 * self.h), int(0.9 * self.h))
-                rotation = random.randint(0, 360)
-                scale = random.uniform(0.7, 1.3)
-                self.blood_splashes.append(
-                    (splash_x, splash_y, pygame.time.get_ticks(), rotation, scale)
-                )
+        elif isinstance(weapon, Grenade):
+            self.health -= 50
         else:
-            self.health -= 25
+            self.health -= 10
 
     def punch(self):
         now = pygame.time.get_ticks()
@@ -334,6 +327,20 @@ class Player:
             start_y = self.y + int(0.35 * self.h)
             proj = ThrownKatana(start_x, start_y, self.facing, self.equiped_weapon)
             self.thrown_projectiles.append(proj)
+            self.equiped_weapon = None
+        
+        elif isinstance(self.equiped_weapon, Grenade):
+            start_x = self.x + (
+                self.w if self.facing == "RIGHT" else -self.equiped_weapon.size
+            )
+            start_y = self.y + int(0.35 * self.h)
+            proj = ThrownGrenade(start_x, start_y, self.facing, self.equiped_weapon)
+            self.thrown_projectiles.append(proj)
+            
+            throw_sound = pygame.mixer.Sound("assets/audio/grenade_throw.mp3")
+            throw_sound.set_volume(0.3)
+            throw_sound.play()
+            
             self.equiped_weapon = None
 
     def update_animation(self, moving_left, moving_right):
