@@ -73,7 +73,7 @@ class SpeedBoost(PowerUp):
     @property
     def image(self):
         image = pygame.image.load("assets/items/speed_boost.png").convert_alpha()
-        return pygame.transform.scale(image, (self.size, self.size))
+        return pygame.transform.scale(image, (self.size + 5, self.size + 5))
 
     def apply(self, player):
         self.audio_logic("itemReceive")
@@ -104,3 +104,30 @@ class Heart(PowerUp):
     def apply(self, player):
         self.state = "USED"
         player.lives += self.heal_amount
+
+
+class Shield(PowerUp):
+    def __init__(self):
+        self.x = random.randint(50, 1920 - 50)
+        self.hits = 2
+        self.cooldown = 5000 # 5 seconds
+        self.duration = 8000  # 8 seconds the shield lasts
+
+    @property
+    def image(self):
+        img = pygame.image.load("assets/items/shield_item.png").convert_alpha()
+        return pygame.transform.scale(img, (self.size, self.size))
+    
+    def apply(self, player):
+        now = pygame.time.get_ticks()
+
+        # cooldown check
+        if now - player.last_shield_time < self.cooldown:
+            return
+
+        self.state = "USED"
+        player.shield_active = True
+        player.shield_hits = self.hits
+        player.last_shield_time = now
+        # expire shield after duration
+        player.shield_until = now + self.duration

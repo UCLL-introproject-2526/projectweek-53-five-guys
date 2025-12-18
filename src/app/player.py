@@ -38,6 +38,14 @@ class Player:
         self.base_speed = 10
         self.speed = self.base_speed
 
+        # --- SHIELD ---
+        self.shield_active = False
+        self.shield_hits = 0
+        self.last_shield_time = 0
+        self.shield_until = 0  # when shield expires
+
+        
+
         self.active_powerups = []
 
         self.heart_img = pygame.transform.scale(
@@ -51,6 +59,21 @@ class Player:
             pygame.image.load(f"assets/player_{player}/victory.png").convert_alpha(),
             (self.w, self.h),
         )
+
+        self.shield_orb_img = pygame.transform.scale(
+           pygame.image.load("assets/items/shield_orb.png").convert_alpha(),
+            (self.w + 120, self.h + 120)
+        )
+        # If missing, fall back to normal orb.
+
+        self.shield_orb_cracked_img = pygame.transform.scale(
+            pygame.image.load("assets/items/shield_orb_cracked.png").convert_alpha(),
+            (self.w + 120, self.h + 120)
+        )
+
+        self.shield_orb_img.set_alpha(120)  # 0–255 (lower = more transparent)
+        self.shield_orb_cracked_img.set_alpha(120)  # same transparency for cracked orb
+
 
         if player == 1:
             self.key_left = pygame.K_a
@@ -177,9 +200,16 @@ class Player:
 
         self.current_img = self.idle_img
 
+
+
     def core_logic(self, platforms, events):
         keys = pygame.key.get_pressed()
         now_ms = pygame.time.get_ticks()
+
+        # expire shield if duration elapsed
+        if self.shield_active and now_ms >= getattr(self, "shield_until", 0):
+            self.shield_active = False
+            self.shield_hits = 0
 
         if self.lives <= 0:
             return
@@ -394,6 +424,19 @@ class Player:
         self.update_animation(moving_left, moving_right)
 
     def hit(self, hit_from):
+        now =  pygame.time.get_ticks()
+        
+        #----- SHIELD LOGIC ----
+        if self.shield_active:
+            self.shield_hits -= 1
+
+            # shield breaks after 2 hits
+            if self.shield_hits <= 0:
+                self.shield_active = False
+
+            return  # NO DAMAGE TAKEN
+        
+        #----- NORMAL HIT ----
         self.hit_on = pygame.time.get_ticks()
         self.hit_from = hit_from
         self.got_hit = True
@@ -402,6 +445,7 @@ class Player:
     def punch(self):
         now = pygame.time.get_ticks()
         self.audio_logic("punch")
+
 
         if now - self.punched_on < 300:
             return
@@ -486,8 +530,19 @@ class Player:
                     screen.blit(self.death_img, (self.x, self.y))
             elif opponent_dead:
                 screen.blit(self.victory_img, (self.x, self.y))
+                if self.shield_hits > 0:
+                    orb_x = self.x-63
+                    orb_y = self.y-54
+                    orb_img = self.shield_orb_cracked_img if self.shield_hits == 1 else self.shield_orb_img
+                    screen.blit(orb_img, (orb_x, orb_y))
             else:
                 screen.blit(self.current_img, (self.x, self.y))
+                if self.shield_hits > 0:
+                    orb_x = self.x-63
+                    orb_y = self.y-54
+                    orb_img = self.shield_orb_cracked_img if self.shield_hits == 1 else self.shield_orb_img
+                    screen.blit(orb_img, (orb_x, orb_y))
+       
 
     def draw_hearts(self, screen):
         start_y = 20
@@ -617,3 +672,6 @@ class Player:
 
     def map_value(self, x, in_min, in_max, out_min, out_max):
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+    
+    
+
