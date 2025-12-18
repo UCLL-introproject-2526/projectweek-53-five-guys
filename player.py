@@ -350,7 +350,12 @@ class Player:
                     self.is_attacking = False
                     self.attack_frame = 0
 
-                    self.current_img = self.idle_img
+                    if self.facing == "RIGHT":
+                        self.current_img = pygame.transform.flip(
+                            self.idle_img, True, False
+                        )
+                    else:
+                        self.current_img = self.idle_img
                 else:
                     self.current_img = frames[self.attack_frame]
             return
@@ -373,7 +378,10 @@ class Player:
         elif moving_right:
             frames = self.walk_right
         else:
-            self.current_img = self.idle_img
+            if self.facing == "RIGHT":
+                self.current_img = pygame.transform.flip(self.idle_img, True, False)
+            else:
+                self.current_img = self.idle_img
             self.frame_index = 0
             self.anim_timer = 0
             return
