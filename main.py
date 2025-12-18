@@ -117,8 +117,8 @@ async def main():
 
             virtual.blit((background), (0, 0))
 
-            for p in platforms:
-                p.draw(virtual)
+            #for p in platforms:
+                #p.draw(virtual)
 
             player1.core_logic(platforms, events)
             player2.core_logic(platforms, events)

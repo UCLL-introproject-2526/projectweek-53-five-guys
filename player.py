@@ -647,7 +647,7 @@ class Player:
             self.respawn()
 
     def respawn(self):
-        RESPAWN_OFFSET_Y = 60
+        RESPAWN_OFFSET_Y = 100
 
         self.x = self.respawn_x
         self.y = self.respawn_y - RESPAWN_OFFSET_Y
