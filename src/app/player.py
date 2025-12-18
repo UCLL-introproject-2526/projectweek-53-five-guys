@@ -59,6 +59,7 @@ class Player:
             self.key_down = pygame.K_s
             self.key_punch = pygame.K_e
             self.key_dash = pygame.K_r
+            self.key_block = pygame.K_t
             self.x = 550
             self.respawn_x = 550
             self.y = 400
@@ -70,6 +71,7 @@ class Player:
             self.key_down = pygame.K_DOWN
             self.key_punch = pygame.K_m
             self.key_dash = pygame.K_n
+            self.key_block = pygame.K_COMMA
             self.x = 1470
             self.respawn_x = 1470
             self.y = 400
@@ -153,6 +155,20 @@ class Player:
             (self.w, self.h),
         )
 
+        # blocking attacks
+        self.block_right = pygame.transform.scale(
+            pygame.image.load(
+                f"assets/player_{player}/block/block_right.png"
+            ).convert_alpha(),
+            (self.w, self.h),
+        )
+        self.block_left = pygame.transform.scale(
+            pygame.image.load(
+                f"assets/player_{player}/block/block_left.png"
+            ).convert_alpha(),
+            (self.w, self.h),
+        )
+
         self.facing = "RIGHT"
         self.frame_index = 0
         self.anim_timer = 0
@@ -164,6 +180,10 @@ class Player:
 
         self.attack_frame_duration_ms = 90
         self.last_attack_frame_at = 0
+
+        self.is_blocking = False
+        self.block_duration = 400
+        self.block_until = 0
 
         self.is_dashing = False
         self.dash_speed = 28
@@ -264,6 +284,8 @@ class Player:
                     self.punch()
                 if event.key == self.key_dash:
                     self.start_dash(now_ms)
+                if event.key == self.key_block:
+                    self.block()
 
         for p in self.punches:
             now = pygame.time.get_ticks()
@@ -394,6 +416,8 @@ class Player:
         self.update_animation(moving_left, moving_right)
 
     def hit(self, hit_from):
+        if self.is_blocking:
+            return
         self.hit_on = pygame.time.get_ticks()
         self.hit_from = hit_from
         self.got_hit = True
@@ -424,12 +448,33 @@ class Player:
         self.punched_on = now
         self.punches.append(punch_meta)
 
+    def block(self):
+        now = pygame.time.get_ticks()
+        if self.is_dashing or self.dead:
+            return
+        
+        self.is_blocking = True
+        self.block_until = now + self.block_duration        
+        self.is_attacking = False
+        self.current_img = (
+            self.block_left if self.facing == "LEFT" else self.block_right
+        )
+
+
     def update_animation(self, moving_left, moving_right):
         if self.is_dashing:
             self.current_img = (
                 self.dash_left if self.facing == "LEFT" else self.dash_right
             )
             return
+        
+        if self.is_blocking:
+            now = pygame.time.get_ticks()
+            if now < self.block_until:
+                self.current_img = self.block_left if self.facing == "LEFT" else self.block_right
+                return 
+            else:
+                self.is_blocking = False
 
         if self.is_attacking:
             frames = self.attack_left if self.facing == "LEFT" else self.attack_right

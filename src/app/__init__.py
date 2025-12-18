@@ -17,7 +17,7 @@ def main():
     clock = pygame.time.Clock()
 
     pygame.mixer.music.load("assets/audio/background_menu_song.wav") 
-    pygame.mixer.music.play(-1) # -1 means loop forever
+    pygame.mixer.music.play(-1)
 
     player1_name, player2_name, chosen_bg = startpage(virtual, screen)
 
