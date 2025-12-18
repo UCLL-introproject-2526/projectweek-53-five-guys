@@ -36,6 +36,36 @@ async def main():
         game_quit_img = pygame.transform.scale(game_quit_img, (220, 70))
         game_quit_rect = game_quit_img.get_rect(bottomleft=(30, VIRTUAL_SIZE[1] - 30))
 
+
+        # control page 
+        controls_btn_img = pygame.image.load("assets/button/control.png").convert_alpha()
+        controls_btn_img = pygame.transform.scale(controls_btn_img, (250, 70))
+        controls_btn_rect = controls_btn_img.get_rect(
+            bottomleft=(30, VIRTUAL_SIZE[1] - 30 - 80)  
+        )
+
+       
+        popup_img = pygame.image.load("assets/controlPage.png").convert_alpha()
+        popup_img = pygame.transform.smoothscale(popup_img, (1400, 800))
+        popup_img = round_corners(popup_img, radius=50) 
+        popup_rect = popup_img.get_rect(center=(VIRTUAL_SIZE[0] // 2, VIRTUAL_SIZE[1] // 2))
+
+
+        close_img = None
+        try:
+            close_img = pygame.image.load("assets/button/control_exit.png").convert_alpha()
+            close_img = pygame.transform.smoothscale(close_img, (55, 55))
+        except:
+            close_img = None  
+
+        close_rect = pygame.Rect(0, 0, 55, 55)
+        close_rect.topright = (popup_rect.right - 15, popup_rect.top + 15)
+
+        show_popup = False
+
+        #ends the contols
+
+
         name_font = pygame.font.Font("assets/font/Kaijuz.ttf", 36)
         p1_name_surf = name_font.render(player1_name, True, (255, 255, 255))
         p2_name_surf = name_font.render(player2_name, True, (255, 255, 255))
@@ -117,6 +147,40 @@ async def main():
 
             # for p in platforms:
             # p.draw(virtual)
+
+
+            #draw button for control
+            virtual.blit(controls_btn_img, controls_btn_rect)
+            virtual.blit(game_quit_img, game_quit_rect)
+
+            
+            if controls_btn_rect.collidepoint(mouse_pos) and mouse_click:
+                show_popup = True
+
+           
+            if show_popup:
+               
+                for event in events:
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                        show_popup = False
+
+                should_close = draw_image_popup(
+                    virtual, popup_img, popup_rect, close_img, close_rect, mouse_pos, mouse_click
+                )
+                if should_close:
+                    show_popup = False
+
+                blit_scaled(screen, virtual)
+                pygame.display.flip()
+                continue  
+
+            #ends here 
+        
+
+
+
+
+
 
             player1.core_logic(platforms, events)
             player2.core_logic(platforms, events)
@@ -232,6 +296,48 @@ async def main():
             pygame.display.flip()
 
 
+
+def draw_image_popup(virtual, popup_img, popup_rect, close_img, close_rect, mouse_pos, mouse_click):
+    
+    overlay = pygame.Surface(virtual.get_size(), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 160))
+    virtual.blit(overlay, (0, 0))
+
+    
+    virtual.blit(popup_img, popup_rect)
+
+    
+    if close_img is not None:
+        virtual.blit(close_img, close_rect)
+    else:
+        pygame.draw.rect(virtual, (30, 30, 30), close_rect, border_radius=8)
+        pygame.draw.rect(virtual, (255, 255, 255), close_rect, width=2, border_radius=8)
+        font = pygame.font.Font(None, 48)
+        x_surf = font.render("X", True, (255, 255, 255))
+        x_rect = x_surf.get_rect(center=close_rect.center)
+        virtual.blit(x_surf, x_rect)
+
+   
+    return mouse_click and close_rect.collidepoint(mouse_pos)
+
+def round_corners(surf: pygame.Surface, radius: int) -> pygame.Surface:
+    w, h = surf.get_size()
+    radius = max(0, min(radius, min(w, h)//2))
+
+   
+    mask = pygame.Surface((w, h), pygame.SRCALPHA)
+    pygame.draw.rect(mask, (255, 255, 255, 255), mask.get_rect(), border_radius=radius)
+
+   
+    rounded = surf.copy()
+    rounded.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+    return rounded
+
+
+
+
+
+
 def blit_scaled(screen, virtual):
     win_w, win_h = screen.get_size()
     scale = min(win_w / VIRTUAL_SIZE[0], win_h / VIRTUAL_SIZE[1])
@@ -247,5 +353,6 @@ def blit_scaled(screen, virtual):
     screen.fill((0, 0, 0))
     screen.blit(scaled, (x, y))
 
-
 asyncio.run(main())
+
+
