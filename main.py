@@ -55,8 +55,8 @@ async def main():
         pygame.time.set_timer(ITEM_SPAWN_EVENT, 1000)
 
         platforms = [
-            Platform(280, 420, 470, 73, True),
-            Platform(1190, 420, 559, 73, True),
+            Platform(280, 420, 440, 73, True),
+            Platform(1210, 420, 540, 73, True),
             Platform(422, 758, 1084, 79, False),
             Platform(524, 837, 223, 102, False),
             Platform(1120, 837, 223, 102, False),
@@ -117,8 +117,8 @@ async def main():
 
             virtual.blit((background), (0, 0))
 
-            # for p in platforms:
-            # p.draw(virtual)
+            for p in platforms:
+                p.draw(virtual)
 
             player1.core_logic(platforms, events)
             player2.core_logic(platforms, events)
