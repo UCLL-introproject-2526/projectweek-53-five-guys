@@ -36,6 +36,10 @@ def startpage(screen, real):
         char2_img, (character_width, charcter_height)
     )
 
+    logo_img = pygame.image.load(
+        "assets/backgrounds/logo_five5Guys.png"
+    ).convert_alpha()
+
     character_between_gap = 650
     char1_rect = char1_img.get_rect(
         center=(screen_w // 2 - character_between_gap, screen_h // 2 + 100)
@@ -43,6 +47,8 @@ def startpage(screen, real):
     char2_rect = char2_img.get_rect(
         center=(screen_w // 2 + character_between_gap, screen_h // 2 + 100)
     )
+    logo_img = pygame.transform.scale(logo_img, (800, 400))
+    logo_rect = logo_img.get_rect(center=(VIRTUAL_SIZE[0] // 2 + 50, 200))
 
     box1_rect = pygame.Rect(char1_rect.centerx - 150, char1_rect.bottom + 10, 300, 50)
     box2_rect = pygame.Rect(char2_rect.centerx - 150, char2_rect.bottom + 10, 300, 50)
@@ -137,6 +143,7 @@ def startpage(screen, real):
 
         screen.blit(start_img, start_rect)
         screen.blit(quit_img, quit_rect)
+        screen.blit(logo_img, logo_rect)
 
         if start_rect.collidepoint(mouse_pos) and mouse_click:
             return name1, name2, bg_files[selected_bg_index]
