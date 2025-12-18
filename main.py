@@ -61,7 +61,7 @@ async def main():
             Platform(762, 869, 331, 135, False),
         ]
 
-        end_page = EndPage()  # nnnnnnn
+        end_page = EndPage()
 
         running = True
         while running:
@@ -107,13 +107,11 @@ async def main():
                         case "KATANA":
                             katana = Katana()
 
-            mouse_click = any(  # nnnnnn
+            mouse_click = any(
                 event.type == pygame.MOUSEBUTTONDOWN and event.button == 1
                 for event in events
             )
-
             mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), screen)
-            # mouse_click = pygame.mouse.get_pressed()[0]
 
             virtual.blit((background), (0, 0))
 
@@ -155,7 +153,7 @@ async def main():
             player1.check_death(VIRTUAL_SIZE[1])
             player2.check_death(VIRTUAL_SIZE[1])
 
-            if player1.lives <= 0 or player2.lives <= 0:  # nnn for end page
+            if player1.lives <= 0 or player2.lives <= 0:
                 if player1.lives <= 0:
                     winner_name = player2_name
                     loser_name = player1_name
@@ -203,13 +201,12 @@ async def main():
                     katana = None
 
             if heart:
-                heart.update(platforms)  # falls down / lands on platforms
-                heart.draw(virtual)  # draw the heart
+                heart.update(platforms)
+                heart.draw(virtual)
 
                 heart.check_collision(player1)
                 heart.check_collision(player2)
 
-                # Remove heart if collected or expired
                 if heart.state == "USED":
                     heart = None
 
@@ -220,15 +217,11 @@ async def main():
                 speed_boost.check_collision(player1)
                 speed_boost.check_collision(player2)
 
-                # Fell off screen without being collected
                 if speed_boost.state == "USED":
                     speed_boost = None
 
             virtual.blit(p1_name_surf, (40, 104))
             virtual.blit(p2_name_surf, (VIRTUAL_SIZE[0] - 320, 104))
-
-            # mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), screen)  # moved to top after event handling
-            # mouse_click = pygame.mouse.get_pressed()[0]
 
             virtual.blit(game_quit_img, game_quit_rect)
 
