@@ -1,5 +1,6 @@
 import pygame
 import sys
+from manual import manual_page
 
 VIRTUAL_SIZE = (1920, 1080)
 clock = pygame.time.Clock()
@@ -151,10 +152,10 @@ def startpage(screen, real):
         
         if quit_rect.collidepoint(mouse_pos) and mouse_click:
             pygame.quit(); sys.exit()
-
-        if manual_rect.collidepoint(mouse_pos):
-            pygame.draw.rect(screen, (255, 255, 255), manual_rect.inflate(10, 10), 2)
-
+            
+        if manual_rect.collidepoint(mouse_pos) and mouse_click:
+         manual_page(screen, real, VIRTUAL_SIZE, blit_scaled, screen_to_virtual)
+         continue
         blit_scaled(real, screen)
         pygame.display.flip()
         clock.tick(60)  # Add frame rate limiting
