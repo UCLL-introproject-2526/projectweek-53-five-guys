@@ -25,7 +25,12 @@ async def main():
     # pygame.mixer.music.play(-1)
 
     while True:
-        player1_name, player2_name, background_img = startpage(virtual, screen)
+        result = startpage(virtual, screen)
+        
+        if result is None:
+            break
+            
+        player1_name, player2_name, background_img = result
 
         # pygame.mixer.music.stop()
 
@@ -75,12 +80,12 @@ async def main():
         running = True
         while running:
             clock.tick(60)
-            virtual.blit((background), (0, 0))
 
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
-                    running = False
+                    pygame.quit()
+                    sys.exit()
                 if event.type == ITEM_SPAWN_EVENT:
                     check = {
                         None: True,
@@ -237,20 +242,52 @@ async def main():
                     winner_name = player1_name
                     loser_name = player2_name
 
-                action = end_page.handle_input(mouse_pos, mouse_click)
-                end_page.draw(virtual, winner_name, mouse_pos, mouse_click)
+                # Stop the timer immediately
+                pygame.time.set_timer(ITEM_SPAWN_EVENT, 0)
 
-                blit_scaled(screen, virtual)
-                pygame.display.flip()
+                # Game over loop
+                game_over = True
+                while game_over:
+                    game_over_events = pygame.event.get()
+                    for event in game_over_events:
+                        if event.type == pygame.QUIT:
+                            pygame.quit()
+                            sys.exit()
+                    
+                    go_mouse_click = any(
+                        event.type == pygame.MOUSEBUTTONDOWN and event.button == 1
+                        for event in game_over_events
+                    )
+                    go_mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), screen)
 
-                if action == "restart":
-                    break
+                    action = end_page.handle_input(go_mouse_pos, go_mouse_click)
+                    
+                    # Draw everything fresh
+                    virtual.blit(background, (0, 0))
+                    player1.draw(virtual, opponent_dead=(player2.dead or player2.lives <= 0))
+                    player2.draw(virtual, opponent_dead=(player1.dead or player1.lives <= 0))
+                    
+                    # Draw end page overlay (this covers the quit button)
+                    end_page.draw(virtual, winner_name, go_mouse_pos, go_mouse_click)
 
-                if action == "quit":
-                    pygame.quit()
-                    sys.exit()
+                    # Scale and display
+                    blit_scaled(screen, virtual)
+                    pygame.display.flip()
+                    clock.tick(60)
 
-                continue
+                    if action == "restart":
+                        game_over = False
+                        running = False
+                        pygame.time.set_timer(ITEM_SPAWN_EVENT, 0)
+                        pygame.event.clear()
+                        break
+
+                    if action == "quit":
+                        pygame.time.set_timer(ITEM_SPAWN_EVENT, 0)
+                        pygame.quit()
+                        sys.exit()
+
+                break
 
             player1.x = max(0, min(VIRTUAL_SIZE[0] - player1.w, player1.x))
             player2.x = max(0, min(VIRTUAL_SIZE[0] - player2.w, player2.x))
@@ -323,9 +360,13 @@ async def main():
 
             if game_quit_rect.collidepoint(mouse_pos) and mouse_click:
                 running = False
+                pygame.time.set_timer(ITEM_SPAWN_EVENT, 0)
+                continue
 
             blit_scaled(screen, virtual)
             pygame.display.flip()
+        
+        await asyncio.sleep(0.2)
 
 
 def blit_scaled(screen, virtual):

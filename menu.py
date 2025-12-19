@@ -76,7 +76,7 @@ def startpage(screen, real):
 
     while True:
         mouse_pos = screen_to_virtual(pygame.mouse.get_pos(), real)
-        mouse_click = pygame.mouse.get_pressed()[0]
+        mouse_click = False  # Changed: don't use get_pressed()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -84,6 +84,8 @@ def startpage(screen, real):
                 sys.exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_click = True  # Set to True on click event
+                
                 for i, r in enumerate(bg_rects):
                     if r.collidepoint(mouse_pos):
                         selected_bg_index = i
@@ -155,6 +157,7 @@ def startpage(screen, real):
 
         blit_scaled(real, screen)
         pygame.display.flip()
+        clock.tick(60)  # Add frame rate limiting
 
 
 def blit_scaled(screen, virtual):
