@@ -252,35 +252,17 @@ class Player:
                     )
                 self.punch = punch_meta
 
-        # new_punches = []
-        # for p in self.punche:
-        #     now = pygame.time.get_ticks()
-        #     if now - p[2] >= 300:
-        #         break
-        #
-        #     if self.facing == "LEFT":
-        #         punch_meta = (
-        #             self.x,
-        #             self.y + int(0.3 * self.h),
-        #             now,
-        #             self.equiped_weapon,
-        #         )
-        #     else:
-        #         punch_meta = (
-        #             (self.x * 0.9) + self.w,
-        #             self.y + int(0.3 * self.h),
-        #             now,
-        #             self.equiped_weapon,
-        #         )
-        #
-        #     new_punches.append(punch_meta)
-        #
-        # self.punches = new_punches
 
         self.update_animation(moving_left, moving_right)
 
     def hit(self, direction, weapon, is_projectile=False):
-        # Check if player has an active shield
+
+        if self.is_blocking:
+            return
+
+        if self.dead or self.is_invincible():
+            return
+
         if isinstance(self.equiped_shield, Shield) and self.equiped_shield.state == "EQUIPPED":
             shield_broken = self.equiped_shield.take_damage()
             if shield_broken:
@@ -291,11 +273,10 @@ class Player:
         self.hit_from = direction
         self.got_hit = True
 
-        resist = 1
-
+        resist = 1.0
         if isinstance(weapon, Katana):
             self.health -= 33.5 * resist
-        if is_projectile and isinstance(weapon, Grenade):
+        elif is_projectile and isinstance(weapon, Grenade):
             self.health -= 50.0 * resist
         else:
             self.health -= 10 * resist
