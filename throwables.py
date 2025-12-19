@@ -127,7 +127,7 @@ class ThrownGrenade:
 
         if not self.explosion_sound_played:
             try:
-                explosion_sound = pygame.mixer.Sound("assets/audio/explosion.mp3")
+                explosion_sound = pygame.mixer.Sound("assets/audio/explosion.ogg")
                 explosion_sound.set_volume(0.3)
                 explosion_sound.play()
                 self.explosion_sound_played = True
