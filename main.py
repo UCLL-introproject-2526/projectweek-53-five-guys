@@ -14,15 +14,15 @@ VIRTUAL_SIZE = (1920, 1080)
 
 
 async def main():
-    # pygame.mixer.init()
+    pygame.mixer.init()
     pygame.init()
 
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     virtual = pygame.Surface(VIRTUAL_SIZE)
     clock = pygame.time.Clock()
 
-    # pygame.mixer.music.load("assets/audio/background_menu_song.wav")
-    # pygame.mixer.music.play(-1)
+    pygame.mixer.music.load("assets/audio/background_menu_song.ogg")
+    pygame.mixer.music.play(-1)
 
     while True:
         result = startpage(virtual, screen)
@@ -32,7 +32,7 @@ async def main():
             
         player1_name, player2_name, background_img = result
 
-        # pygame.mixer.music.stop()
+        pygame.mixer.music.stop()
 
         player1 = Player(1)
         player2 = Player(2)
@@ -46,7 +46,7 @@ async def main():
         game_quit_img = pygame.transform.scale(game_quit_img, (220, 70))
         game_quit_rect = game_quit_img.get_rect(bottomleft=(30, VIRTUAL_SIZE[1] - 30))
 
-        name_font = pygame.font.Font("assets/font/PressStart2P-Regular.ttf", 36)
+        name_font = pygame.font.Font("assets/font/upheavtt.ttf", 36)
         p1_name_surf = name_font.render(player1_name, True, (255, 255, 255))
         p2_name_surf = name_font.render(player2_name, True, (255, 255, 255))
 
