@@ -1,5 +1,7 @@
 import pygame
 import sys
+from manual import manual_page
+
 
 VIRTUAL_SIZE = (1920, 1080)
 clock = pygame.time.Clock()
@@ -145,6 +147,12 @@ def startpage(screen, real):
         screen.blit(start_img, start_rect)
         screen.blit(quit_img, quit_rect)
         screen.blit(manual_img, manual_rect)
+
+        
+        if manual_rect.collidepoint(mouse_pos) and mouse_click:
+         manual_page(screen, real, VIRTUAL_SIZE, blit_scaled, screen_to_virtual)
+         continue
+
 
         if start_rect.collidepoint(mouse_pos) and mouse_click:
             return name1, name2, bg_files[selected_bg_index]
