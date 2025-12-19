@@ -41,7 +41,7 @@ async def main():
         game_quit_img = pygame.transform.scale(game_quit_img, (220, 70))
         game_quit_rect = game_quit_img.get_rect(bottomleft=(30, VIRTUAL_SIZE[1] - 30))
 
-        name_font = pygame.font.Font("assets/font/PressStart2P-Regular.ttf", 36)
+        name_font = pygame.font.Font("assets/font/upheavtt.ttf", 36)
         p1_name_surf = name_font.render(player1_name, True, (255, 255, 255))
         p2_name_surf = name_font.render(player2_name, True, (255, 255, 255))
 
