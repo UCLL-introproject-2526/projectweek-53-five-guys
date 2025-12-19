@@ -112,21 +112,32 @@ class Heart(PowerUp):
 class Shield(PowerUp):
     def __init__(self):
         self.x = random.randint(50, 1920 - 50)
-        self.hits = 2
-        self.start_time = 0
-        self.duration = 8000  # 8 seconds the shield lasts
+        self.durability = 2  
+        self.max_durability = 2
+        self.state = "FALLING"
+
+    def take_damage(self):
+        self.durability -= 1
+        if self.durability <= 0:
+            self.state = "USED"
+            return True  # Shield is broken
+        return False  # Shield still active
+
+    def get_durability_ratio(self):
+        return self.durability / self.max_durability
 
     @property
     def image(self):
-        img = pygame.image.load("assets/items/shield_item.png").convert_alpha()
-        return pygame.transform.scale(img, (self.size, self.size))
+        return pygame.transform.scale(
+            pygame.image.load("assets/items/shield_item.png").convert_alpha(),
+            (self.size, self.size),
+        )
 
     def apply(self, player):
         self.audio_logic("itemReceive")
-        self.state = "USED"
-        self.start_time = pygame.time.get_ticks()
-        player.active_powerups.append((self, pygame.time.get_ticks()))
-        player.shield_active = True
+        self.state = "EQUIPPED"  # Change from "USED" to "EQUIPPED"
+        player.equiped_shield = self  # Set the equipped shield
+        # Remove the shield_active and active_powerups logic
 
 
 class Katana(PowerUp):

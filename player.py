@@ -279,22 +279,23 @@ class Player:
 
         self.update_animation(moving_left, moving_right)
 
-    def hit(self, hit_from, weapon, hit_by_throw):
-        if self.is_blocking:
+    def hit(self, direction, weapon, is_projectile=False):
+        # Check if player has an active shield
+        if isinstance(self.equiped_shield, Shield) and self.equiped_shield.state == "EQUIPPED":
+            shield_broken = self.equiped_shield.take_damage()
+            if shield_broken:
+                self.equiped_shield = None
             return
 
         self.hit_on = pygame.time.get_ticks()
-        self.hit_from = hit_from
+        self.hit_from = direction
         self.got_hit = True
 
-        if self.shield_active:
-            resist = 0.7
-        else:
-            resist = 1
+        resist = 1
 
         if isinstance(weapon, Katana):
             self.health -= 33.5 * resist
-        if hit_by_throw and isinstance(weapon, Grenade):
+        if is_projectile and isinstance(weapon, Grenade):
             self.health -= 50.0 * resist
         else:
             self.health -= 10 * resist
@@ -502,10 +503,10 @@ class Player:
                 else:
                     screen.blit(self.death_img, (self.x, self.y))
             elif opponent_dead:
-                if self.shield_active:
+                if isinstance(self.equiped_shield, Shield) and self.equiped_shield.state == "EQUIPPED":
                     orb_x = self.x - 63
                     orb_y = self.y - 54
-                    orb_img = self.shield_orb_img
+                    orb_img = self.shield_orb_cracked_img if self.equiped_shield.durability == 1 else self.shield_orb_img
                     screen.blit(orb_img, (orb_x, orb_y))
                 screen.blit(self.victory_img, (self.x, self.y))
             else:
@@ -539,10 +540,11 @@ class Player:
                     offset = right_off if self.facing == "RIGHT" else left_off
                     screen.blit(katana_img, offset)
 
-                if self.shield_active:
+                # draw shield orb when equipped
+                if isinstance(self.equiped_shield, Shield) and self.equiped_shield.state == "EQUIPPED":
                     orb_x = self.x - 63
                     orb_y = self.y - 54
-                    orb_img = self.shield_orb_img
+                    orb_img = self.shield_orb_cracked_img if self.equiped_shield.durability == 1 else self.shield_orb_img
                     screen.blit(orb_img, (orb_x, orb_y))
 
     def draw_hearts(self, screen):
@@ -641,6 +643,37 @@ class Player:
                 (rel_x_cen - 25, rel_y_cen - 25),
             )
 
+        # Draw shield durability if equipped
+        if isinstance(self.equiped_shield, Shield) and self.equiped_shield.state == "EQUIPPED":
+            shield_slot = len(self.active_powerups) + (1 if self.equiped_weapon else 0)
+            shield_x = powerup_x + (increment * shield_slot) * invert
+            shield_y = powerup_y
+            
+            # Draw shield icon in circle
+            pygame.draw.circle(screen, (255, 0, 0), (shield_x, shield_y), 30)
+            shield_icon = pygame.transform.scale(self.equiped_shield.image, (50, 50))
+            screen.blit(shield_icon, (shield_x - 25, shield_y - 25))
+            
+            # Draw durability arc
+            end_angle = math.radians(
+                self.map_value(
+                    self.equiped_shield.durability,
+                    0,
+                    self.equiped_shield.max_durability,
+                    0,
+                    360,
+                )
+            )
+            bounding_box = pygame.Rect(shield_x - 30, shield_y - 30, 60, 60)
+            pygame.draw.arc(screen, (34, 34, 34), bounding_box, 0, end_angle, 7)
+            
+            # Draw durability text below
+            font = pygame.font.Font("assets/font/PressStart2P-Regular.ttf", 10)
+            durability_text = f"{self.equiped_shield.durability}/{self.equiped_shield.max_durability}"
+            text_surf = font.render(durability_text, True, (255, 255, 255))
+            text_rect = text_surf.get_rect(center=(shield_x, shield_y + 45))
+            screen.blit(text_surf, text_rect)
+
     def draw_blood(self, screen):
         now = pygame.time.get_ticks()
         for splash in self.blood_splashes[:]:
@@ -717,6 +750,7 @@ class Player:
         self.active_powerups = []
         self.equiped_weapon = None
         self.thrown_projectiles = []
+        self.equiped_shield = None
 
         self.dead = False
 
@@ -781,6 +815,7 @@ class Player:
         self.respawn_y = 290
         self.active_powerups = []
         self.equiped_weapon = None
+        self.equiped_shield = None
         self.blood_img = pygame.image.load("assets/items/blood.png").convert_alpha()
         self.blood_img = pygame.transform.scale(self.blood_img, (80, 80))
         self.blood_splashes = []
@@ -807,7 +842,6 @@ class Player:
         self.block_until = 0
         self.thrown_projectiles = []
         self.dash_hit_done = False
-        self.shield_active = False
 
         self.block_left = pygame.transform.scale(
             pygame.image.load(
@@ -955,5 +989,5 @@ class Player:
             pygame.image.load("assets/items/shield_orb_cracked.png").convert_alpha(),
             (self.w + 120, self.h + 120),
         )
-        self.shield_orb_img.set_alpha(120)  # 0–255 (lower = more transparent)
+        self.shield_orb_img.set_alpha(120)
         self.shield_orb_cracked_img.set_alpha(120)

@@ -262,15 +262,12 @@ async def main():
 
                     action = end_page.handle_input(go_mouse_pos, go_mouse_click)
                     
-                    # Draw everything fresh
                     virtual.blit(background, (0, 0))
                     player1.draw(virtual, opponent_dead=(player2.dead or player2.lives <= 0))
                     player2.draw(virtual, opponent_dead=(player1.dead or player1.lives <= 0))
                     
-                    # Draw end page overlay (this covers the quit button)
                     end_page.draw(virtual, winner_name, go_mouse_pos, go_mouse_click)
 
-                    # Scale and display
                     blit_scaled(screen, virtual)
                     pygame.display.flip()
                     clock.tick(60)
@@ -340,7 +337,7 @@ async def main():
                 shield.check_collision(player1)
                 shield.check_collision(player2)
 
-                if shield.state == "USED":
+                if shield.state in ("USED", "EQUIPPED"):
                     shield = None
 
             if grenade:
