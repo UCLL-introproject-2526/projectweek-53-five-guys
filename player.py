@@ -776,7 +776,7 @@ class Player:
 
     def audio_logic(self, audioName):
         try:
-            sfx = pygame.mixer.Sound(f"assets/audio/{audioName}.wav")
+            sfx = pygame.mixer.Sound(f"assets/audio/{audioName}.ogg")
             sfx.set_volume(1.0)
             sfx.play()
         except pygame.error:
